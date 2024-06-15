@@ -12,9 +12,10 @@ contract MarketToken is ERC20 {
     constructor(
         string memory _name,
         string memory _symbol,
-        MarketCurve _curve
+        MarketCurve _curve,
+        uint256 _initialSupply
     ) ERC20(_name, _symbol) {
-        _mint(address(_curve), 1_000_000_000 * 10 ** decimals());
+        _mint(address(_curve), _initialSupply * 10 ** decimals());
         curve = _curve;
     }
 }

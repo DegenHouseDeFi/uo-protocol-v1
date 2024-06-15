@@ -31,7 +31,12 @@ contract MarketFactory is Ownable {
     function createMarket(string calldata name, string calldata symbol) public {
         // TODO: Update the initialisation parameters for the MarketCurve.
         MarketCurve curve = new MarketCurve(0, 0, 0, 0, 0);
-        MarketToken token = new MarketToken(name, symbol, curve);
+        MarketToken token = new MarketToken(
+            name,
+            symbol,
+            curve,
+            params.yMintAmount
+        );
 
         tokenToCurve[token] = curve;
     }
