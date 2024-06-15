@@ -10,7 +10,7 @@ Users do not decide:
 2. The initial reserves of the token. 
 
 
-## Smart Contracts
+## Smart Contracts (not updated)
 
 1. **Market Factory:**
 This contract facilitates the creation of new markets. It deploys a manager, a token, and a curve. Then, it assigns the correct parameters to each of those contracts. 
@@ -27,6 +27,31 @@ This contract represents the token that has been created. It's a standard ERC-20
 
 ---
 
-### How to setup the market?
-1. Deploy the Manager, Token, and the Curve. 
-2. Set the correct parameters for the curve. 
+## Bonding Curve Parameters (Notes + WIP)
+
+- Token Supply: 1 Billion
+    - For sale: 800 Million
+    - For LP: 200 Million
+
+- Token Price Initial: 1e-8 ETH
+- Token Price Final: ?
+
+---
+
+### Simulating Pump's Parameters
+
+- Token Supply: 1 Billion
+    - For sale: 800 Million
+    - For LP: 200 Million
+
+- Token Price
+    - Initial: 2.8e-8
+    - Final: 4.1e-7
+
+- Virtual Reserves
+    - Initial:
+        - SOL: 30.00000003
+        - MEME: 1_073_000_000
+    - Final: 
+        - SOL: 115
+        - MEME: 279_900_000
