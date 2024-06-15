@@ -2,19 +2,19 @@
 pragma solidity ^0.8.13;
 
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import {MarketManager} from "./MarketManager.sol";
+import {MarketCurve} from "./MarketCurve.sol";
 
 /**
  * @title Token created by the Market Factory
  */
 contract MarketToken is ERC20 {
-    MarketManager immutable manager;
+    MarketCurve immutable curve;
     constructor(
         string memory _name,
         string memory _symbol,
-        MarketManager _manager
+        MarketCurve _curve
     ) ERC20(_name, _symbol) {
-        _mint(_manager, 1_000_000_000 * 10 ** decimals());
-        manager = _manager;
+        _mint(address(_curve), 1_000_000_000 * 10 ** decimals());
+        curve = _curve;
     }
 }
