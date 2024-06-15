@@ -11,7 +11,10 @@ import {MarketToken} from "./MarketToken.sol";
  */
 contract MarketFactory {
     function createMarket(string calldata name, string calldata symbol) public {
-        // deploy a manager
-        // initialise the manager
+        MarketManager manager = new MarketManager();
+        MarketToken token = new MarketToken(name, symbol, manager);
+        MarketCurve curve = new MarketCurve(manager);
+
+        manager.initialise();
     }
 }

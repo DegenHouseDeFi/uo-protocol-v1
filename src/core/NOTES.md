@@ -24,3 +24,9 @@ This contract is responsible for the trading activity of the token before the li
 
 4. **Market Token:**
 This contract represents the token that has been created. It's a standard ERC-20.
+
+---
+
+### How to setup the market?
+1. Deploy the Manager, Token, and the Curve. 
+2. Set the correct parameters for the curve. 
