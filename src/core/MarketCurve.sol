@@ -32,7 +32,6 @@ contract MarketCurve {
 
     //////////////////// CONSTRUCTOR ////////////////////
     constructor(
-        MarketFactory _factory,
         uint256 _cap,
         uint256 _xVirtualReserve,
         uint256 _yVirtualReserve,
