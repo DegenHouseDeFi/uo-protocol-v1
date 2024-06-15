@@ -35,4 +35,26 @@ contract MarketFactory is Ownable {
 
         tokenToCurve[token] = curve;
     }
+
+    function updateLiquidityCap(uint256 _liquidityCap) public onlyOwner {
+        params.liquidityCap = _liquidityCap;
+    }
+
+    function updateVirtualReserveConfig(
+        uint256 _xStartVirtualReserve,
+        uint256 _yStartVirtualReserve
+    ) public onlyOwner {
+        params.xStartVirtualReserve = _xStartVirtualReserve;
+        params.yStartVirtualReserve = _yStartVirtualReserve;
+    }
+
+    function updateTokenParams(
+        uint256 _yMintAmount,
+        uint256 _yReservedForLP,
+        uint256 _yReservedForCurve
+    ) public onlyOwner {
+        params.yMintAmount = _yMintAmount;
+        params.yReservedForLP = _yReservedForLP;
+        params.yReservedForCurve = _yReservedForCurve;
+    }
 }
