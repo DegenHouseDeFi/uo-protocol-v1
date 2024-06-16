@@ -35,8 +35,14 @@ contract MarketFactory is Ownable {
     }
 
     function createMarket(string calldata name, string calldata symbol) public {
-        // TODO: Update the initialisation parameters for the MarketCurve.
-        MarketCurve curve = new MarketCurve(0, 0, 0, 0, 0);
+        MarketCurve curve = new MarketCurve(
+            params.liquidityCap,
+            params.xStartVirtualReserve,
+            params.yStartVirtualReserve,
+            params.yReservedForLP,
+            params.yReservedForCurve
+        );
+
         MarketToken token = new MarketToken(
             name,
             symbol,
@@ -46,7 +52,7 @@ contract MarketFactory is Ownable {
 
         tokenToCurve[token] = curve;
 
-        emit MarketCreated(msg.sender, name, token, curve);
+        emit MarketCreated(msg.sender, name, address(token), address(curve));
     }
 
     function updateLiquidityCap(uint256 _liquidityCap) public onlyOwner {
