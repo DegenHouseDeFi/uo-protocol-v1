@@ -33,8 +33,30 @@ This contract represents the token that has been created. It's a standard ERC-20
     - For sale: 800 Million
     - For LP: 200 Million
 
-- Token Price Initial: 1e-8 ETH
-- Token Price Final: ?
+- Token Price Initial: 1.2e-9 ETH | $0.0000042
+- Token Price Final:   1.8e-8 ETH | $0.0000641
+
+- Virtual Reserves:
+    - Initial:
+        - ETH: 1.296
+        - Token: 1.08 billion
+    - Final: 
+        - ETH: 5.04
+        - Token: 280 million
+
+- Final Liquidity to LP:
+    - ETH: Final - Initial - 0.1(fee) = 3.644 
+    - Token: 200M
+
+- Token Metrics on DEX:
+    - Price: $6.37e-05
+    - Market Cap: $63k
+    
+
+- Market Cap:
+    - Curve Initial: $3.5k
+    - Curve Final: $64k
+    - DEX Initial: $63k
 
 ---
 
@@ -45,8 +67,9 @@ This contract represents the token that has been created. It's a standard ERC-20
     - For LP: 200 Million
 
 - Token Price
-    - Initial: 2.8e-8
-    - Final: 4.1e-7
+    - Initial: 2.8e-8 SOL | $0.0000042
+    - Final:   4.1e-7 SOL | $0.0000615
+    
 
 - Virtual Reserves
     - Initial:
@@ -54,4 +77,12 @@ This contract represents the token that has been created. It's a standard ERC-20
         - MEME: 1_073_000_000
     - Final: 
         - SOL: 115
-        - MEME: 279_900_000
+        - MEME: 279_900_000 
+
+- Final liquidity to LP
+    - SOL: 79
+    - MEME: 200_000_000
+
+- Starting params on DEX: 
+    - Price: 3.95e-7 SOL
+    - Market Cap: $67.15k
