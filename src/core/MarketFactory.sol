@@ -11,6 +11,7 @@ import {MarketToken} from "./MarketToken.sol";
  * @dev Responsible for accurately deploying new token markets with the preffered parameters.
  */
 contract MarketFactory is Ownable {
+    //////////////////// DATA STRUCTURES ////////////////////
     struct MarketParameters {
         uint256 liquidityCap; // amount of ETH to be raised before moving to a DEX
         uint256 xStartVirtualReserve; // initial virtual reserve for ETH
@@ -20,6 +21,7 @@ contract MarketFactory is Ownable {
         uint256 yReservedForCurve; // Amount of created tokens to sell through the curve
     }
 
+    //////////////////// EVENTS ////////////////////
     event MarketCreated(
         address creator,
         string name,
@@ -27,13 +29,16 @@ contract MarketFactory is Ownable {
         address curve
     );
 
+    //////////////////// VARIABLES ////////////////////
     mapping(MarketToken => MarketCurve) public tokenToCurve;
     MarketParameters params;
 
+    //////////////////// CONSTRUCTOR ////////////////////
     constructor(MarketParameters memory _params) Ownable(msg.sender) {
         params = _params;
     }
 
+    //////////////////// FUNCTIONS ////////////////////
     function createMarket(string calldata name, string calldata symbol) public {
         MarketCurve curve = new MarketCurve(
             params.liquidityCap,
