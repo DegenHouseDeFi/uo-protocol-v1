@@ -3,6 +3,8 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 import {MarketFactory} from "../src/core/MarketFactory.sol";
+import {MarketToken} from "../src/core/MarketToken.sol";
+import {MarketCurve} from "../src/core/MarketCurve.sol";
 
 contract MarketFactoryTest is Test {
     MarketFactory public factory;
@@ -20,7 +22,9 @@ contract MarketFactoryTest is Test {
         );
     }
 
-    function test_deployed() public {
+    function test_FactoryDeployed() public {
         assertEq(address(factory) != address(0), true);
     }
+
+    function test_MarketCreated() public {}
 }
