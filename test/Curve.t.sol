@@ -6,7 +6,7 @@ import {MarketFactory} from "../src/core/MarketFactory.sol";
 import {MarketToken} from "../src/core/MarketToken.sol";
 import {MarketCurve} from "../src/core/MarketCurve.sol";
 
-contract MarketFactoryTest is Test {
+contract MarketCurveTest is Test {
     MarketCurve public curve;
     MarketToken public token;
 
@@ -63,9 +63,17 @@ contract MarketFactoryTest is Test {
         assertEq(yReservedForCurve_, yReservedForCurve);
     }
 
-    function test_getQuoteForOneEther() public view {
+    function test_getQuoteForOneEther() public {
+        curve.initialiseCurve(token);
+
         uint256 quote = curve.getQuote(1 ether, 0);
-        console.log("quote: ", quote);
         assertApproxEqRel(quote, 470_383_275 * 1e18, 0.1e18);
+    }
+
+    function test_getQuoteForMillionTokens() public {
+        curve.initialiseCurve(token);
+
+        uint256 quote = curve.getQuote(0, 1_000_000 ether);
+        assertApproxEqRel(quote, 0.0012 ether, 0.1e18);
     }
 }

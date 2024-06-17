@@ -57,24 +57,15 @@ contract MarketCurve {
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
-        /*
-            The quote is calculated as follows:
-            - If xAmountIn is greater than 0, then the user is swapping x for y
-                - The quote should not exceed the available y
-            - If yAmountIn is greater than 0, then the user is swapping y for x
-                - The quote should not exceed the available x
-        */
-
         require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
+
         (uint256 xReserve, uint256 yReserve) = (params.xVirtualReserve, params.yVirtualReserve);
 
         if (xAmountIn > 0) {
-            // Swapping xAmountIn worth of x for y
+            quote = (yReserve * xAmountIn) / (xReserve + xAmountIn);
         } else {
-            // Swapping yAmountIn worth of y for x
+            quote = (xReserve * yAmountIn) / (yReserve + yAmountIn);
         }
-
-        quote = 0;
     }
 
     function getParams()
@@ -101,6 +92,10 @@ contract MarketCurve {
     function getBalances() public view returns (uint256 x, uint256 y) {
         x = token.balanceOf(address(this));
         y = token.totalSupply();
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a <= b ? a : b;
     }
 
     //////////////////// MODIFIERS ////////////////////
