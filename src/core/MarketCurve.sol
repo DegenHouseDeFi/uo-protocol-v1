@@ -56,6 +56,17 @@ contract MarketCurve {
         balances.y = balanceY - params.yReservedForLP;
     }
 
+    function swap(uint256 xIn, uint256 yIn) public returns (uint256 out) {
+        /**
+         * This function should →
+         *         1. Check if the curve is still trading
+         *         2. Fetch the quote from getQuote()
+         *         3. Apply the balance checks on the quote
+         *         4. Update the reserves
+         *         5. Transfer the tokens
+         */
+    }
+
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
         require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
 
