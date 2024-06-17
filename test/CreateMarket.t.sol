@@ -39,6 +39,6 @@ contract MarketFactoryTest is Test {
 
         assertEq(address(curve.mom()), address(factory));
         assertEq(address(curve.token()), address(token));
-        assertEq(uint(curve.status()), uint(MarketCurve.Status.Trading));
+        assertEq(uint256(curve.status()), uint256(MarketCurve.Status.Trading));
     }
 }

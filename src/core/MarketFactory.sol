@@ -22,12 +22,7 @@ contract MarketFactory is Ownable {
     }
 
     //////////////////// EVENTS ////////////////////
-    event MarketCreated(
-        address creator,
-        string name,
-        address token,
-        address curve
-    );
+    event MarketCreated(address creator, string name, address token, address curve);
 
     //////////////////// VARIABLES ////////////////////
     MarketParameters public params;
@@ -51,12 +46,7 @@ contract MarketFactory is Ownable {
             })
         );
 
-        MarketToken token = new MarketToken(
-            name,
-            symbol,
-            curve,
-            params.yMintAmount
-        );
+        MarketToken token = new MarketToken(name, symbol, curve, params.yMintAmount);
 
         curve.initialiseCurve(token);
 
@@ -70,19 +60,18 @@ contract MarketFactory is Ownable {
         params.liquidityCap = _liquidityCap;
     }
 
-    function updateVirtualReserveConfig(
-        uint256 _xStartVirtualReserve,
-        uint256 _yStartVirtualReserve
-    ) public onlyOwner {
+    function updateVirtualReserveConfig(uint256 _xStartVirtualReserve, uint256 _yStartVirtualReserve)
+        public
+        onlyOwner
+    {
         params.xStartVirtualReserve = _xStartVirtualReserve;
         params.yStartVirtualReserve = _yStartVirtualReserve;
     }
 
-    function updateTokenParams(
-        uint256 _yMintAmount,
-        uint256 _yReservedForLP,
-        uint256 _yReservedForCurve
-    ) public onlyOwner {
+    function updateTokenParams(uint256 _yMintAmount, uint256 _yReservedForLP, uint256 _yReservedForCurve)
+        public
+        onlyOwner
+    {
         params.yMintAmount = _yMintAmount;
         params.yReservedForLP = _yReservedForLP;
         params.yReservedForCurve = _yReservedForCurve;
