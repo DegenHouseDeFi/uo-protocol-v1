@@ -43,6 +43,38 @@ contract MarketCurve {
         status = Status.Trading;
     }
 
+    // function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
+    //     require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
+    //     (uint256 xReserve, uint256 yReserve) = (params.xVirtualReserve, params.yVirtualReserve);
+
+    //     if (xAmountIn > 0) {
+    //         // Swapping xAmountIn worth of x for y
+    //     } else {
+    //         // Swapping yAmountIn worth of y for x
+    //     }
+    // }
+
+    function getParams()
+        public
+        view
+        returns (
+            uint256 cap,
+            uint256 xVirtualReserve,
+            uint256 yVirtualReserve,
+            uint256 yReservedForLP,
+            uint256 yReservedForCurve
+        )
+    {
+        (cap, xVirtualReserve, yVirtualReserve, yReservedForLP, yReservedForCurve) = (
+            params.cap, params.xVirtualReserve, params.yVirtualReserve, params.yReservedForLP, params.yReservedForCurve
+        );
+    }
+
+    function getReserves() public view returns (uint256 xReserve, uint256 yReserve) {
+        xReserve = params.xVirtualReserve;
+        yReserve = params.yVirtualReserve;
+    }
+
     //////////////////// MODIFIERS ////////////////////
     modifier onlyMom() {
         require(msg.sender == mom, "ONLY_MOM");

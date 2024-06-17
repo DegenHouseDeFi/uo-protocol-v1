@@ -40,5 +40,16 @@ contract MarketFactoryTest is Test {
         assertEq(address(curve.mom()), address(factory));
         assertEq(address(curve.token()), address(token));
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.Trading));
+
+        (uint256 x, uint256 y) = curve.getReserves();
+        assertEq(x, 1.296 ether);
+        assertEq(y, 1_080_000_000 ether);
+
+        (uint256 cap, uint256 xReserve, uint256 yReserve, uint256 yLP, uint256 yCurve) = curve.getParams();
+        assertEq(cap, 5.04 ether);
+        assertEq(xReserve, 1.296 ether);
+        assertEq(yReserve, 1_080_000_000 ether);
+        assertEq(yLP, 200_000_000 ether);
+        assertEq(yCurve, 800_000_000 ether);
     }
 }
