@@ -62,4 +62,10 @@ contract MarketFactoryTest is Test {
         assertEq(yReservedForLP_, yReservedForLP);
         assertEq(yReservedForCurve_, yReservedForCurve);
     }
+
+    function test_getQuoteForOneEther() public view {
+        uint256 quote = curve.getQuote(1 ether, 0);
+        console.log("quote: ", quote);
+        assertApproxEqRel(quote, 470_383_275 * 1e18, 0.1e18);
+    }
 }

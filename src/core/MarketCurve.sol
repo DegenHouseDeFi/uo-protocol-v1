@@ -43,18 +43,18 @@ contract MarketCurve {
         status = Status.Trading;
     }
 
-    // function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
-    //     require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
-    //     (uint256 xReserve, uint256 yReserve) = (params.xVirtualReserve, params.yVirtualReserve);
+    function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
+        require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
+        (uint256 xReserve, uint256 yReserve) = (params.xVirtualReserve, params.yVirtualReserve);
 
-    //     if (xAmountIn > 0) {
-    //         // Swapping xAmountIn worth of x for y
-    //     } else {
-    //         // Swapping yAmountIn worth of y for x
-    //     }
+        if (xAmountIn > 0) {
+            // Swapping xAmountIn worth of x for y
+        } else {
+            // Swapping yAmountIn worth of y for x
+        }
 
-    //     quote = 0;
-    // }
+        quote = 0;
+    }
 
     function getParams()
         public
