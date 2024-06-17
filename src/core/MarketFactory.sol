@@ -31,7 +31,7 @@ contract MarketFactory is Ownable {
 
     //////////////////// VARIABLES ////////////////////
     mapping(MarketToken => MarketCurve) public tokenToCurve;
-    MarketParameters params;
+    MarketParameters public params;
 
     //////////////////// CONSTRUCTOR ////////////////////
     constructor(MarketParameters memory _params) Ownable(msg.sender) {
