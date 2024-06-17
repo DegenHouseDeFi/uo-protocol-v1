@@ -15,7 +15,7 @@ contract MarketToken is ERC20 {
         MarketCurve _curve,
         uint256 _initialSupply
     ) ERC20(_name, _symbol) {
-        _mint(address(_curve), _initialSupply * 10 ** decimals());
+        _mint(address(_curve), _initialSupply);
         curve = _curve;
     }
 }

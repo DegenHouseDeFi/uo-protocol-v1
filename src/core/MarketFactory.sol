@@ -56,6 +56,8 @@ contract MarketFactory is Ownable {
             params.yMintAmount
         );
 
+        curve.initialiseCurve(token);
+
         allTokens.push(address(token));
         tokenToCurve[token] = curve;
 

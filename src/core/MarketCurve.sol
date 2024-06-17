@@ -25,7 +25,7 @@ contract MarketCurve {
     }
 
     //////////////////// VARIABLES ////////////////////
-    Status status;
+    Status public status;
     address public mom;
     MarketToken public token;
     CurveParameters public params;

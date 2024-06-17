@@ -22,9 +22,23 @@ contract MarketFactoryTest is Test {
         );
     }
 
-    function test_FactoryDeployed() public {
-        assertEq(address(factory) != address(0), true);
-    }
+    function test_MarketCreated() public {
+        factory.createMarket("Test Token", "TT");
+        MarketToken token = MarketToken(factory.allTokens(0));
+        MarketCurve curve = MarketCurve(factory.tokenToCurve(token));
 
-    function test_MarketCreated() public {}
+        assertNotEq(address(token), address(0));
+        assertNotEq(address(curve), address(0));
+
+        assertEq(token.name(), "Test Token");
+        assertEq(token.symbol(), "TT");
+        assertEq(token.decimals(), 18);
+        assertEq(token.totalSupply(), 1_000_000_000 ether);
+
+        assertEq(token.balanceOf(address(curve)), 1_000_000_000 ether);
+
+        assertEq(address(curve.mom()), address(factory));
+        assertEq(address(curve.token()), address(token));
+        assertEq(uint(curve.status()), uint(MarketCurve.Status.Trading));
+    }
 }
