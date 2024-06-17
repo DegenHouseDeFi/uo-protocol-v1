@@ -42,11 +42,13 @@ contract MarketFactory is Ownable {
     //////////////////// FUNCTIONS ////////////////////
     function createMarket(string calldata name, string calldata symbol) public {
         MarketCurve curve = new MarketCurve(
-            params.liquidityCap,
-            params.xStartVirtualReserve,
-            params.yStartVirtualReserve,
-            params.yReservedForLP,
-            params.yReservedForCurve
+            MarketCurve.CurveParameters({
+                cap: params.liquidityCap,
+                xVirtualReserve: params.xStartVirtualReserve,
+                yVirtualReserve: params.yStartVirtualReserve,
+                yReservedForLP: params.yReservedForLP,
+                yReservedForCurve: params.yReservedForCurve
+            })
         );
 
         MarketToken token = new MarketToken(

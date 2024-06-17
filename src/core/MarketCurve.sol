@@ -31,22 +31,9 @@ contract MarketCurve {
     CurveParameters public params;
 
     //////////////////// CONSTRUCTOR ////////////////////
-    constructor(
-        uint256 _cap,
-        uint256 _xVirtualReserve,
-        uint256 _yVirtualReserve,
-        uint256 _yReservedForLP,
-        uint256 _yReservedForCurve
-    ) {
+    constructor(CurveParameters memory _params) {
         mom = msg.sender;
-        params = CurveParameters({
-            cap: _cap,
-            xVirtualReserve: _xVirtualReserve,
-            yVirtualReserve: _yVirtualReserve,
-            yReservedForLP: _yReservedForLP,
-            yReservedForCurve: _yReservedForCurve
-        });
-
+        params = _params;
         status = Status.Created;
     }
 
