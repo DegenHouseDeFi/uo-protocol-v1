@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonding Curve Simulation with Multiple Accounts</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        input,
+        button,
+        select {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        #transactions {
+            margin-top: 20px;
+        }
+
+        .transaction {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        canvas {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Bonding Curve Simulation with Multiple Accounts</h1>
+    <button onclick="resetSimulation()">Reset Simulation</button>
+    <div>
+        <canvas id="priceChart"></canvas>
+    </div>
+    <div>
+        <h2>Choose an Account</h2>
+        <select id="accountSelector" onchange="updateAccountDisplay()">
+            <option value="0">Account 1</option>
+            <option value="1">Account 2</option>
+            <option value="2">Account 3</option>
+            <option value="3">Account 4</option>
+            <option value="4">Account 5</option>
+        </select>
+        <p>ETH: <span id="accountEth">5</span> ETH</p>
+        <p>Tokens: <span id="accountTokens">0</span> Tokens</p>
+    </div>
+    <div>
+        <h2>Current Reserves</h2>
+        <p>ETH: <span id="ethReserve">1.296</span> ETH</p>
+        <p>Tokens: <span id="tokenReserve">1080000000</span> Tokens</p>
+        <p>Price per Token: <span id="pricePerToken"></span> ETH | <span id="pricePerTokenUSD"></span> USD</p>
+        <p>Market Cap: <span id="marketCap"></span> USD</p>
+    </div>
+    <div>
+        <h2>Buy Tokens</h2>
+        <input type="number" id="ethToSpend" placeholder="ETH to spend">
+        <button onclick="buyTokens()">Buy Tokens</button>
+    </div>
+    <div>
+        <h2>Sell Tokens</h2>
+        <input type="number" id="tokensToSell" placeholder="Tokens to sell">
+        <button onclick="sellTokens()">Sell Tokens</button>
+    </div>
+    <div id="transactions">
+        <h2>Transaction Log</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Action</th>
+                    <th>Tokens</th>
+                    <th>ETH</th>
+                </tr>
+            </thead>
+            <tbody id="transactionLog"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const initialEthReserve = 1.296;
+        const initialTokenReserve = 1080000000;
+        const initialAccountEth = 5;
+        const initialAccountTokens = 0;
+        let ethReserve = initialEthReserve;
+        let tokenReserve = initialTokenReserve;
+        const ethPriceUSD = 3500;
+        const totalSupply = 1e9;
+        let priceData = [];
+        let accounts = Array(5).fill().map(() => ({ eth: initialAccountEth, tokens: initialAccountTokens }));
+
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        let priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: priceData.map((_, index) => index),
+                datasets: [{
+                    label: 'Price of Token in USD',
+                    backgroundColor: 'rgb(75, 192, 192)',
+                    borderColor: 'rgb(75, 192, 192)',
+                    data: priceData,
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        function resetSimulation() {
+            ethReserve = initialEthReserve;
+            tokenReserve = initialTokenReserve;
+            accounts = Array(5).fill().map(() => ({ eth: initialAccountEth, tokens: initialAccountTokens }));
+            priceData = [];
+            document.getElementById('transactionLog').innerHTML = ''; // Clear transaction log
+            priceChart.destroy(); // Destroy and recreate the chart to reset it
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Price of Token in USD',
+                        backgroundColor: 'rgb(75, 192, 192)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        data: [],
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+            updatePrice();
+            updateAccountDisplay();
+        }
+
+        function updatePrice() {
+            const pricePerToken = ethReserve / tokenReserve;
+            const pricePerTokenUSD = pricePerToken * ethPriceUSD;
+            document.getElementById('ethReserve').textContent = ethReserve.toFixed(8);
+            document.getElementById('tokenReserve').textContent = tokenReserve.toFixed(0);
+            document.getElementById('pricePerToken').textContent = pricePerToken.toFixed(8);
+            document.getElementById('pricePerTokenUSD').textContent = pricePerTokenUSD.toFixed(8);
+            const marketCap = pricePerTokenUSD * totalSupply;
+            document.getElementById('marketCap').textContent = marketCap.toFixed(2);
+
+            // Update chart data
+            priceData.push(pricePerTokenUSD);
+            priceChart.data.labels = priceData.map((_, index) => index);
+            priceChart.data.datasets[0].data = priceData;
+            priceChart.update();
+        }
+
+        function updateAccountDisplay() {
+            const selectedAccount = document.getElementById('accountSelector').value;
+            document.getElementById('accountEth').textContent = accounts[selectedAccount].eth.toFixed(8);
+            document.getElementById('accountTokens').textContent = accounts[selectedAccount].tokens.toFixed(0);
+        }
+
+        function logTransaction(account, action, tokens, eth) {
+            const log = document.getElementById('transactionLog');
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>Account ${parseInt(account) + 1}</td>
+                             <td>${action}</td>
+                             <td>${tokens}</td>
+                             <td>${eth.toFixed(8)}</td>`;
+            log.appendChild(row);
+        }
+
+        function buyTokens() {
+            const selectedAccount = document.getElementById('accountSelector').value;
+            const ethToSpend = parseFloat(document.getElementById('ethToSpend').value);
+            if (!ethToSpend || ethToSpend > accounts[selectedAccount].eth) return;
+            const newEthReserve = ethReserve + ethToSpend;
+            const newTokenReserve = tokenReserve * (ethReserve / newEthReserve);
+            const tokensBought = parseInt(tokenReserve - newTokenReserve);
+            accounts[selectedAccount].eth -= ethToSpend;
+            accounts[selectedAccount].tokens += tokensBought;
+            tokenReserve = newTokenReserve;
+            ethReserve = newEthReserve;
+            updatePrice();
+            updateAccountDisplay();
+            logTransaction(selectedAccount, 'Bought', tokensBought, ethToSpend);
+        }
+
+        function sellTokens() {
+            const selectedAccount = document.getElementById('accountSelector').value;
+            const tokensToSell = parseFloat(document.getElementById('tokensToSell').value);
+            if (!tokensToSell || tokensToSell > accounts[selectedAccount].tokens) return;
+            const newTokenReserve = tokenReserve + tokensToSell;
+            const newEthReserve = ethReserve * (tokenReserve / newTokenReserve);
+            const ethReceived = ethReserve - newEthReserve;
+            accounts[selectedAccount].eth += ethReceived;
+            accounts[selectedAccount].tokens -= tokensToSell;
+            ethReserve = newEthReserve;
+            tokenReserve = newTokenReserve;
+            updatePrice();
+            updateAccountDisplay();
+            logTransaction(selectedAccount, 'Sold', tokensToSell, ethReceived);
+        }
+
+        updatePrice(); // Initial price update
+        updateAccountDisplay(); // Initial account update
+    </script>
+</body>
+
+</html>
