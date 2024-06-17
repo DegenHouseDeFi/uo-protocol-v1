@@ -30,8 +30,9 @@ contract MarketFactory is Ownable {
     );
 
     //////////////////// VARIABLES ////////////////////
-    mapping(MarketToken => MarketCurve) public tokenToCurve;
     MarketParameters public params;
+    mapping(MarketToken => MarketCurve) public tokenToCurve;
+    address[] public allTokens;
 
     //////////////////// CONSTRUCTOR ////////////////////
     constructor(MarketParameters memory _params) Ownable(msg.sender) {
@@ -55,6 +56,7 @@ contract MarketFactory is Ownable {
             params.yMintAmount
         );
 
+        allTokens.push(address(token));
         tokenToCurve[token] = curve;
 
         emit MarketCreated(msg.sender, name, address(token), address(curve));
