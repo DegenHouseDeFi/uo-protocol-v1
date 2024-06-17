@@ -6,6 +6,7 @@ import {MarketToken} from "./MarketToken.sol";
 
 /**
  * @title Bonding Curve for a token market
+ * @dev This contract is designed to ONLY work with the MarketToken contract
  */
 contract MarketCurve {
     //////////////////// DATA STRUCTURES ////////////////////
@@ -24,10 +25,16 @@ contract MarketCurve {
         uint256 yReservedForCurve; // amount of created tokens to sell through the curve
     }
 
+    struct Balances {
+        uint256 x;
+        uint256 y;
+    }
+
     //////////////////// VARIABLES ////////////////////
-    Status public status;
     address public mom;
+    Status public status;
     MarketToken public token;
+    Balances public balances;
     CurveParameters public params;
 
     //////////////////// CONSTRUCTOR ////////////////////
@@ -41,9 +48,23 @@ contract MarketCurve {
     function initialiseCurve(MarketToken _token) public onlyMom {
         token = _token;
         status = Status.Trading;
+
+        uint256 balanceY = token.balanceOf(address(this));
+        require(balanceY == params.yReservedForCurve + params.yReservedForLP, "INVALID_BALANCE");
+
+        balances.x = 0;
+        balances.y = balanceY - params.yReservedForLP;
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
+        /*
+            The quote is calculated as follows:
+            - If xAmountIn is greater than 0, then the user is swapping x for y
+                - The quote should not exceed the available y
+            - If yAmountIn is greater than 0, then the user is swapping y for x
+                - The quote should not exceed the available x
+        */
+
         require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
         (uint256 xReserve, uint256 yReserve) = (params.xVirtualReserve, params.yVirtualReserve);
 
@@ -75,6 +96,11 @@ contract MarketCurve {
     function getReserves() public view returns (uint256 xReserve, uint256 yReserve) {
         xReserve = params.xVirtualReserve;
         yReserve = params.yVirtualReserve;
+    }
+
+    function getBalances() public view returns (uint256 x, uint256 y) {
+        x = token.balanceOf(address(this));
+        y = token.totalSupply();
     }
 
     //////////////////// MODIFIERS ////////////////////
