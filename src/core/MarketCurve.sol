@@ -52,6 +52,8 @@ contract MarketCurve {
     //     } else {
     //         // Swapping yAmountIn worth of y for x
     //     }
+
+    //     quote = 0;
     // }
 
     function getParams()
