@@ -56,7 +56,8 @@ contract MarketCurve {
         balances.y = balanceY - params.yReservedForLP;
     }
 
-    function swap(uint256 xIn, uint256 yIn) public returns (uint256 out) {
+    // 🚧
+    function swap(uint256 xIn, uint256 yIn) public payable returns (uint256 out) {
         /**
          * This function should →
          *         1. Check if the curve is still trading
@@ -65,6 +66,25 @@ contract MarketCurve {
          *         4. Update the reserves
          *         5. Transfer the tokens
          */
+        require(status == Status.Trading, "NOT_TRADING");
+        require(xIn == 0 || yIn == 0, "ONE_TOKEN_ONLY");
+        uint256 quote = getQuote(xIn, yIn);
+
+        // TODO: Transfer the tokens kek.
+        if (xIn > 0) {
+            require(msg.value == xIn, "INVALID_VALUE");
+            out = min(quote, balances.y);
+            require(out > 0, "INVALID_OUT");
+
+            balances.x += xIn;
+            balances.y -= out;
+        } else {
+            out = min(quote, balances.x);
+            require(out > 0, "INVALID_OUT");
+
+            balances.x -= out;
+            balances.y += yIn;
+        }
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
