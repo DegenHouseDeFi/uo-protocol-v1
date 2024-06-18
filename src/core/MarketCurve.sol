@@ -70,20 +70,29 @@ contract MarketCurve {
         require(xIn == 0 || yIn == 0, "ONE_TOKEN_ONLY");
         uint256 quote = getQuote(xIn, yIn);
 
-        // TODO: Transfer the tokens kek.
         if (xIn > 0) {
             require(msg.value == xIn, "INVALID_VALUE");
             out = min(quote, balances.y);
             require(out > 0, "INVALID_OUT");
 
+            // TODO: Checks on the inflow and outflow
             balances.x += xIn;
             balances.y -= out;
+
+            params.xVirtualReserve += xIn;
+            params.yVirtualReserve -= out;
+            // TODO: Transfer the tokens kek.
         } else {
             out = min(quote, balances.x);
             require(out > 0, "INVALID_OUT");
 
+            // TODO: Checks on the inflow and outflow
             balances.x -= out;
             balances.y += yIn;
+
+            params.xVirtualReserve -= out;
+            params.yVirtualReserve += yIn;
+            // TODO: Transfer the tokens kek.
         }
     }
 
