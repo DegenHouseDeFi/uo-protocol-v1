@@ -99,6 +99,10 @@ contract MarketCurve {
         sendEther(msg.sender, out);
     }
 
+    function graduate() public {
+        require(status == Status.CapReached, "NOT_CAP_REACHED");
+    }
+
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
         require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
 
