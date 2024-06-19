@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MarketFactory} from "../src/core/MarketFactory.sol";
-import {MarketToken} from "../src/core/MarketToken.sol";
-import {MarketCurve} from "../src/core/MarketCurve.sol";
+import {MarketFactory} from "../../src/core/MarketFactory.sol";
+import {MarketToken} from "../../src/core/MarketToken.sol";
+import {MarketCurve} from "../../src/core/MarketCurve.sol";
 
 contract MarketFactoryTest is Test {
     MarketFactory public factory;

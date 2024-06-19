@@ -2,10 +2,10 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MarketFactory} from "../src/core/MarketFactory.sol";
-import {MarketToken} from "../src/core/MarketToken.sol";
-import {MarketCurve} from "../src/core/MarketCurve.sol";
-import {UniswapV2LiquidityAdapter} from "../src/core/adapters/UniswapV2Adapter.sol";
+import {MarketFactory} from "../../src/core/MarketFactory.sol";
+import {MarketToken} from "../../src/core/MarketToken.sol";
+import {MarketCurve} from "../../src/core/MarketCurve.sol";
+import {UniswapV2LiquidityAdapter} from "../../src/core/adapters/UniswapV2Adapter.sol";
 
 contract MarketCurveTest is Test {
     MarketCurve public curve;
