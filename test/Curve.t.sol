@@ -31,6 +31,8 @@ contract MarketCurveTest is Test {
         token = new MarketToken("Test Token", "TT", curve, yToMint);
     }
 
+    receive() external payable {}
+
     function test_InitialiseCurve() public {
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.Created));
         assertEq(address(curve.mom()), address(this));
@@ -105,5 +107,39 @@ contract MarketCurveTest is Test {
 
         assertEq(ethBalanceSelfBefore - ethBalanceSelfAfter, 1 ether);
         assertEq(tokenBalanceSelfAfter - tokenBalanceSelfBefore, quote);
+    }
+
+    function test_sellTokenForOneEther() public {
+        curve.initialiseCurve(token);
+
+        // Need to buy tokens before we can sell.
+        curve.buy{value: 1 ether}(1 ether);
+        uint256 tokensToSell = token.balanceOf(address(this));
+        token.approve(address(curve), tokensToSell);
+
+        uint256 quote = curve.getQuote(0, tokensToSell);
+
+        (uint256 xReserveBefore, uint256 yReserveBefore) = curve.getReserves();
+        (uint256 xBalanceBefore, uint256 yBalanceBefore) = curve.getBalances();
+
+        uint256 ethBalanceSelfBefore = address(this).balance;
+        uint256 tokenBalanceSelfBefore = token.balanceOf(address(this));
+
+        curve.sell(tokensToSell);
+
+        (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
+        (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();
+
+        uint256 ethBalanceSelfAfter = address(this).balance;
+        uint256 tokenBalanceSelfAfter = token.balanceOf(address(this));
+
+        assertEq(xReserveBefore - xReserveAfter, quote);
+        assertEq(yReserveAfter - yReserveBefore, tokensToSell);
+
+        assertEq(xBalanceBefore - xBalanceAfter, quote);
+        assertEq(yBalanceAfter - yBalanceBefore, tokensToSell);
+
+        assertEq(ethBalanceSelfAfter - ethBalanceSelfBefore, quote);
+        assertEq(tokenBalanceSelfBefore - tokenBalanceSelfAfter, tokensToSell);
     }
 }
