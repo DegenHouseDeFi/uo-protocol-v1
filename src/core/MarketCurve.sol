@@ -64,7 +64,7 @@ contract MarketCurve {
 
         uint256 quote = getQuote(xIn, 0);
 
-        out = min(quote, balances.y);
+        out = quote;
         require(out > 0, "INVALID_OUT");
 
         balances.x += xIn;
@@ -85,7 +85,8 @@ contract MarketCurve {
         require(status == Status.Trading, "NOT_TRADING");
 
         uint256 quote = getQuote(0, yIn);
-        out = min(quote, balances.x);
+
+        out = quote;
         require(quote > 0, "INVALID_QUOTE");
 
         balances.x -= out;
