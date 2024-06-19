@@ -135,8 +135,7 @@ contract MarketCurve {
     }
 
     function getBalances() public view returns (uint256 x, uint256 y) {
-        x = token.balanceOf(address(this));
-        y = token.totalSupply();
+        (x, y) = (balances.x, balances.y);
     }
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
