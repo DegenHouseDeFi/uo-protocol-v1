@@ -96,7 +96,7 @@ contract MarketCurve {
         params.yVirtualReserve += yIn;
 
         token.transferFrom(msg.sender, address(this), yIn);
-        payable(msg.sender).transfer(out);
+        sendEther(msg.sender, out);
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
@@ -141,6 +141,11 @@ contract MarketCurve {
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a <= b ? a : b;
+    }
+
+    function sendEther(address to, uint256 amount) internal {
+        (bool sent,) = to.call{value: amount}("");
+        require(sent, "Failed to send Ether");
     }
 
     //////////////////// MODIFIERS ////////////////////
