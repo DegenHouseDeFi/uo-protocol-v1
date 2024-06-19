@@ -78,18 +78,19 @@ contract MarketCurveTest is Test {
     }
 
     function test_buyTokenWithOneEther() public {
+        // TODO: Test balance changes.
         curve.initialiseCurve(token);
 
         uint256 quote = curve.getQuote(1 ether, 0);
         token.approve(address(curve), quote);
 
-        (uint256 xBefore, uint256 yBefore) = curve.getReserves();
+        (uint256 xReserveBefore, uint256 yReserveBefore) = curve.getReserves();
 
         curve.buy{value: 1 ether}(1 ether);
 
-        (uint256 xAfter, uint256 yAfter) = curve.getReserves();
+        (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
 
-        assertEq(xAfter - xBefore, 1 ether);
-        assertEq(yBefore - yAfter, quote);
+        assertEq(xReserveAfter - xReserveBefore, 1 ether);
+        assertEq(yReserveBefore - yReserveAfter, quote);
     }
 }
