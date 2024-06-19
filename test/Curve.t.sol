@@ -5,10 +5,16 @@ import {Test, console} from "forge-std/Test.sol";
 import {MarketFactory} from "../src/core/MarketFactory.sol";
 import {MarketToken} from "../src/core/MarketToken.sol";
 import {MarketCurve} from "../src/core/MarketCurve.sol";
+import {UniswapV2LiquidityAdapter} from "../src/core/adapters/UniswapV2Adapter.sol";
 
 contract MarketCurveTest is Test {
     MarketCurve public curve;
     MarketToken public token;
+
+    address constant WETH = address(0);
+    address constant FACTORY = address(0);
+    address constant ROUTER = address(0);
+    UniswapV2LiquidityAdapter adapter = new UniswapV2LiquidityAdapter(WETH, FACTORY, ROUTER);
 
     uint256 public constant cap = 5.04 ether;
     uint256 public constant xInitialVirtualReserve = 1.296 ether;
@@ -38,7 +44,7 @@ contract MarketCurveTest is Test {
         assertEq(address(curve.mom()), address(this));
         assertEq(address(curve.token()), address(0));
 
-        curve.initialiseCurve(token);
+        curve.initialiseCurve(token, adapter);
 
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.Trading));
         assertEq(address(curve.token()), address(token));
@@ -66,21 +72,21 @@ contract MarketCurveTest is Test {
     }
 
     function test_getQuoteForOneEther() public {
-        curve.initialiseCurve(token);
+        curve.initialiseCurve(token, adapter);
 
         uint256 quote = curve.getQuote(1 ether, 0);
         assertApproxEqRel(quote, 470_383_275 * 1e18, 0.1e18);
     }
 
     function test_getQuoteForMillionTokens() public {
-        curve.initialiseCurve(token);
+        curve.initialiseCurve(token, adapter);
 
         uint256 quote = curve.getQuote(0, 1_000_000 ether);
         assertEq(quote, 0); // quote is 0 because there is no ETH in the Curve yet.
     }
 
     function test_buyTokenWithOneEther() public {
-        curve.initialiseCurve(token);
+        curve.initialiseCurve(token, adapter);
 
         uint256 quote = curve.getQuote(1 ether, 0);
         token.approve(address(curve), quote);
@@ -110,7 +116,7 @@ contract MarketCurveTest is Test {
     }
 
     function test_sellTokenForOneEther() public {
-        curve.initialiseCurve(token);
+        curve.initialiseCurve(token, adapter);
 
         // Need to buy tokens before we can sell.
         curve.buy{value: 1 ether}(1 ether);

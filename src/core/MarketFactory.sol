@@ -5,6 +5,7 @@ import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 import {MarketCurve} from "./MarketCurve.sol";
 import {MarketToken} from "./MarketToken.sol";
+import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
 
 /**
  * @title Contract to create new token markets.
@@ -28,10 +29,14 @@ contract MarketFactory is Ownable {
     MarketParameters public params;
     mapping(MarketToken => MarketCurve) public tokenToCurve;
     address[] public allTokens;
+    UniswapV2LiquidityAdapter public dexAdapter;
 
     //////////////////// CONSTRUCTOR ////////////////////
-    constructor(MarketParameters memory _params) Ownable(msg.sender) {
+    constructor(MarketParameters memory _params, address _WETH, address _v2Factory, address _v2Router)
+        Ownable(msg.sender)
+    {
         params = _params;
+        dexAdapter = new UniswapV2LiquidityAdapter(_WETH, _v2Factory, _v2Router);
     }
 
     //////////////////// FUNCTIONS ////////////////////
@@ -48,7 +53,7 @@ contract MarketFactory is Ownable {
 
         MarketToken token = new MarketToken(name, symbol, curve, params.yMintAmount);
 
-        curve.initialiseCurve(token);
+        curve.initialiseCurve(token, dexAdapter);
 
         allTokens.push(address(token));
         tokenToCurve[token] = curve;

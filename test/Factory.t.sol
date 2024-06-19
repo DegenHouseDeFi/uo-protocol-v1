@@ -8,6 +8,9 @@ import {MarketCurve} from "../src/core/MarketCurve.sol";
 
 contract MarketFactoryTest is Test {
     MarketFactory public factory;
+    address constant WETH = address(0);
+    address constant FACTORY = address(0);
+    address constant ROUTER = address(0);
 
     function setUp() public {
         factory = new MarketFactory(
@@ -18,7 +21,10 @@ contract MarketFactoryTest is Test {
                 yMintAmount: 1_000_000_000 ether,
                 yReservedForLP: 200_000_000 ether,
                 yReservedForCurve: 800_000_000 ether
-            })
+            }),
+            WETH,
+            FACTORY,
+            ROUTER
         );
     }
 
