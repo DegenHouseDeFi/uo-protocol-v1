@@ -56,44 +56,46 @@ contract MarketCurve {
         balances.y = balanceY - params.yReservedForLP;
     }
 
-    // 🚧
-    function swap(uint256 xIn, uint256 yIn) public payable returns (uint256 out) {
-        /**
-         * This function should →
-         *         1. Check if the curve is still trading
-         *         2. Fetch the quote from getQuote()
-         *         3. Apply the balance checks on the quote
-         *         4. Update the reserves
-         *         5. Transfer the tokens
-         */
+    function buy(uint256 xIn) public payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
+        // Flaw: There are no protections against the user overspending `x` to buy the available `y`
+        require(xIn > 0, "INVALID_IN");
         require(status == Status.Trading, "NOT_TRADING");
-        require(xIn == 0 || yIn == 0, "ONE_TOKEN_ONLY");
-        uint256 quote = getQuote(xIn, yIn);
+        require(msg.value == xIn, "INVALID_VALUE_SENT");
 
-        if (xIn > 0) {
-            require(msg.value == xIn, "INVALID_VALUE");
-            out = min(quote, balances.y);
-            require(out > 0, "INVALID_OUT");
+        uint256 quote = getQuote(xIn, 0);
 
-            // TODO: Checks on the inflow and outflow
-            balances.x += xIn;
-            balances.y -= out;
+        out = min(quote, balances.y);
+        require(out > 0, "INVALID_OUT");
 
-            params.xVirtualReserve += xIn;
-            params.yVirtualReserve -= out;
-            // TODO: Transfer the tokens kek.
-        } else {
-            out = min(quote, balances.x);
-            require(out > 0, "INVALID_OUT");
+        balances.x += xIn;
+        balances.y -= out;
 
-            // TODO: Checks on the inflow and outflow
-            balances.x -= out;
-            balances.y += yIn;
+        params.xVirtualReserve += xIn;
+        params.yVirtualReserve -= out;
 
-            params.xVirtualReserve -= out;
-            params.yVirtualReserve += yIn;
-            // TODO: Transfer the tokens kek.
+        if (balances.y == 0) {
+            status = Status.CapReached;
         }
+
+        token.transfer(msg.sender, out);
+    }
+
+    function sell(uint256 yIn) public onlyTrading nonZeroIn(yIn) returns (uint256 out) {
+        require(yIn > 0, "INVALID_IN");
+        require(status == Status.Trading, "NOT_TRADING");
+
+        uint256 quote = getQuote(0, yIn);
+        out = min(quote, balances.x);
+        require(quote > 0, "INVALID_QUOTE");
+
+        balances.x -= out;
+        balances.y += yIn;
+
+        params.xVirtualReserve -= out;
+        params.yVirtualReserve += yIn;
+
+        token.transferFrom(msg.sender, address(this), yIn);
+        payable(msg.sender).transfer(out);
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
@@ -103,8 +105,10 @@ contract MarketCurve {
 
         if (xAmountIn > 0) {
             quote = (yReserve * xAmountIn) / (xReserve + xAmountIn);
+            quote = min(quote, balances.y);
         } else {
             quote = (xReserve * yAmountIn) / (yReserve + yAmountIn);
+            quote = min(quote, balances.x);
         }
     }
 
@@ -141,6 +145,16 @@ contract MarketCurve {
     //////////////////// MODIFIERS ////////////////////
     modifier onlyMom() {
         require(msg.sender == mom, "ONLY_MOM");
+        _;
+    }
+
+    modifier nonZeroIn(uint256 _in) {
+        require(_in > 0, "INVALID_IN");
+        _;
+    }
+
+    modifier onlyTrading() {
+        require(status == Status.Trading, "NOT_TRADING");
         _;
     }
 }
