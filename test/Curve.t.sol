@@ -148,4 +148,12 @@ contract MarketCurveTest is Test {
         assertEq(ethBalanceSelfAfter - ethBalanceSelfBefore, quote);
         assertEq(tokenBalanceSelfBefore - tokenBalanceSelfAfter, tokensToSell);
     }
+
+    function test_tokenCapReach() public {
+        curve.initialiseCurve(token, adapter);
+        curve.buy{value: 3.8 ether}(3.8 ether);
+
+        MarketCurve.Status curveStatus = curve.status();
+        assertEq(uint256(curveStatus), uint256(MarketCurve.Status.CapReached));
+    }
 }
