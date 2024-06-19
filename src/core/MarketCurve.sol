@@ -4,6 +4,8 @@ pragma solidity ^0.8.13;
 import {MarketFactory} from "./MarketFactory.sol";
 import {MarketToken} from "./MarketToken.sol";
 
+import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
+
 /**
  * @title Bonding Curve for a token market
  * @dev This contract is designed to ONLY work with the MarketToken contract
