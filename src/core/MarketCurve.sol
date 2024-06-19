@@ -38,6 +38,10 @@ contract MarketCurve {
     MarketToken public token;
     Balances public balances;
     CurveParameters public params;
+    UniswapV2LiquidityAdapter public dexAdapter;
+
+    //////////////////// CONSTANTS ////////////////////
+    address constant BURN_ADDRESS = address(0x0);
 
     //////////////////// CONSTRUCTOR ////////////////////
     constructor(CurveParameters memory _params) {
@@ -47,8 +51,9 @@ contract MarketCurve {
     }
 
     //////////////////// FUNCTIONS ////////////////////
-    function initialiseCurve(MarketToken _token) public onlyMom {
+    function initialiseCurve(MarketToken _token, UniswapV2LiquidityAdapter _dexAdapter) public onlyMom {
         token = _token;
+        dexAdapter = _dexAdapter;
         status = Status.Trading;
 
         uint256 balanceY = token.balanceOf(address(this));
@@ -103,6 +108,8 @@ contract MarketCurve {
 
     function graduate() public {
         require(status == Status.CapReached, "NOT_CAP_REACHED");
+        status = Status.Graduated;
+        dexAdapter.createPairAndAddLiquidityETH(address(token), balances.x, params.yReservedForLP, BURN_ADDRESS);
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {

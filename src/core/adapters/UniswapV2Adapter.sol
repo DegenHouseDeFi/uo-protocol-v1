@@ -21,7 +21,6 @@ contract UniswapV2LiquidityAdapter {
     {
         require(msg.value >= xToSupply, "INSUFFICIENT_ETH");
 
-        // Create pair if it doesn't exist
         address pair = IUniswapV2Factory(factory).getPair(token, WETH);
         if (pair == address(0)) {
             pair = IUniswapV2Factory(factory).createPair(token, WETH);
