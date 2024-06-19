@@ -14,10 +14,11 @@ import {IUniswapV2Factory} from "../../src/interfaces/uniswapV2/IUniswapV2Factor
  */
 contract UniV2AdapterTest is Test {
     MarketToken public token;
+
     UniswapV2LiquidityAdapter public adapter;
 
     address constant WETH = address(0x4200000000000000000000000000000000000006);
-    address constant FACTORY = IUniswapV2Factory(address(0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6));
+    address constant FACTORY = address(0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6);
     address constant ROUTER = address(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24);
 
     uint256 public constant tokenToSupply = 200_000_000 ether;
@@ -32,12 +33,12 @@ contract UniV2AdapterTest is Test {
         (uint256 tokenBalanceBefore, uint256 etherBalanceBefore) =
             (token.balanceOf(address(this)), address(this).balance);
 
-        address pair = FACTORY.getPair(address(token), WETH);
+        address pair = IUniswapV2Factory(FACTORY).getPair(address(token), WETH);
         assertEq(pair, address(0), "Pair should not exist");
 
         adapter.createPairAndAddLiquidityETH(address(token), ethToSupply, tokenToSupply, address(this));
 
-        pair = FACTORY.getPair(address(token), WETH);
+        pair = IUniswapV2Factory(FACTORY).getPair(address(token), WETH);
         (uint256 tokenBalanceAfter, uint256 etherBalanceAfter) = (token.balanceOf(address(this)), address(this).balance);
 
         assertTrue(pair != address(0), "Pair should exist");

@@ -51,7 +51,7 @@ contract MarketFactory is Ownable {
             })
         );
 
-        MarketToken token = new MarketToken(name, symbol, curve, params.yMintAmount);
+        MarketToken token = new MarketToken(name, symbol, address(curve), params.yMintAmount);
 
         curve.initialiseCurve(token, dexAdapter);
 
