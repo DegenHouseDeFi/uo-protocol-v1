@@ -109,6 +109,7 @@ contract MarketCurve {
     function graduate() public {
         require(status == Status.CapReached, "NOT_CAP_REACHED");
         status = Status.Graduated;
+        token.approve(address(dexAdapter), params.yReservedForLP);
         dexAdapter.createPairAndAddLiquidityETH(address(token), balances.x, params.yReservedForLP, BURN_ADDRESS);
     }
 

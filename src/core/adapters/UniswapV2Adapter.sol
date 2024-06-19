@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import {MarketToken} from "../MarketToken.sol";
+
 import {IUniswapV2Factory} from "../../interfaces/uniswapV2/IUniswapV2Factory.sol";
 import {IUniswapV2Router02} from "../../interfaces/uniswapV2/IUniswapV2Router02.sol";
 
@@ -26,6 +28,8 @@ contract UniswapV2LiquidityAdapter {
             pair = IUniswapV2Factory(factory).createPair(token, WETH);
         }
 
+        MarketToken(token).transferFrom(msg.sender, address(this), yToSupply);
+        MarketToken(token).approve(address(router), yToSupply);
         router.addLiquidityETH{value: xToSupply}(token, yToSupply, 1, 1, to, block.timestamp);
     }
 }

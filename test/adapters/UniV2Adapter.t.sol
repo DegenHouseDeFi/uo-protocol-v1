@@ -36,7 +36,11 @@ contract UniV2AdapterTest is Test {
         address pair = IUniswapV2Factory(FACTORY).getPair(address(token), WETH);
         assertEq(pair, address(0), "Pair should not exist");
 
-        adapter.createPairAndAddLiquidityETH(address(token), ethToSupply, tokenToSupply, address(this));
+        console.log(tokenBalanceBefore);
+        token.approve(address(adapter), tokenToSupply);
+        adapter.createPairAndAddLiquidityETH{value: ethToSupply}(
+            address(token), ethToSupply, tokenToSupply, address(this)
+        );
 
         pair = IUniswapV2Factory(FACTORY).getPair(address(token), WETH);
         (uint256 tokenBalanceAfter, uint256 etherBalanceAfter) = (token.balanceOf(address(this)), address(this).balance);
