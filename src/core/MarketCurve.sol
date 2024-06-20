@@ -117,7 +117,9 @@ contract MarketCurve {
         require(status == Status.CapReached, "NOT_CAP_REACHED");
         status = Status.Graduated;
         token.approve(address(dexAdapter), params.yReservedForLP);
-        dexAdapter.createPairAndAddLiquidityETH(address(token), balances.x, params.yReservedForLP, BURN_ADDRESS);
+        dexAdapter.createPairAndAddLiquidityETH{value: balances.x}(
+            address(token), balances.x, params.yReservedForLP, BURN_ADDRESS
+        );
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
