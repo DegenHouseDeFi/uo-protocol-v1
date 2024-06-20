@@ -15,7 +15,7 @@ contract MarketFactoryTest is Test {
     function setUp() public {
         factory = new MarketFactory(
             MarketFactory.MarketParameters({
-                liquidityCap: 5.04 ether,
+                liquidityCap: 3.744 ether,
                 xStartVirtualReserve: 1.296 ether,
                 yStartVirtualReserve: 1_080_000_000 ether,
                 yMintAmount: 1_000_000_000 ether,
@@ -52,7 +52,7 @@ contract MarketFactoryTest is Test {
         assertEq(y, 1_080_000_000 ether);
 
         (uint256 cap, uint256 xReserve, uint256 yReserve, uint256 yLP, uint256 yCurve) = curve.getParams();
-        assertEq(cap, 5.04 ether);
+        assertEq(cap, 3.744 ether);
         assertEq(xReserve, 1.296 ether);
         assertEq(yReserve, 1_080_000_000 ether);
         assertEq(yLP, 200_000_000 ether);

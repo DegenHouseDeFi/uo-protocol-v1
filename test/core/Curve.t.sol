@@ -16,7 +16,7 @@ contract MarketCurveTest is Test {
     address constant ROUTER = address(0);
     UniswapV2LiquidityAdapter adapter = new UniswapV2LiquidityAdapter(WETH, FACTORY, ROUTER);
 
-    uint256 public constant cap = 5.04 ether;
+    uint256 public constant cap = 3.744 ether;
     uint256 public constant xInitialVirtualReserve = 1.296 ether;
     uint256 public constant yInitialVirtualReserve = 1_080_000_000 ether;
     uint256 public constant yReservedForLP = 200_000_000 ether;
