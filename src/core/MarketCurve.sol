@@ -81,10 +81,10 @@ contract MarketCurve {
         out = quote;
         require(out > 0, "INVALID_OUT");
 
-        balances.x += xIn;
+        balances.x += adjustedXIn;
         balances.y -= out;
 
-        params.xVirtualReserve += xIn;
+        params.xVirtualReserve += adjustedXIn;
         params.yVirtualReserve -= out;
 
         if (balances.y == 0) {

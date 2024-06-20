@@ -49,7 +49,7 @@ contract BaseIntegrationTest is Test {
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.Trading));
 
         uint256 amount = buyToken(curve, 1 ether);
-        sellToken(token, curve, amount / 2);
+        sellToken(token, curve, amount);
 
         buyToken(curve, 5 ether);
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.CapReached));
