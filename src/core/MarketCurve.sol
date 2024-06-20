@@ -69,7 +69,14 @@ contract MarketCurve {
         require(status == Status.Trading, "NOT_TRADING");
         require(msg.value == xIn, "INVALID_VALUE_SENT");
 
-        uint256 quote = getQuote(xIn, 0);
+        uint256 adjustedXIn = xIn;
+        // The amount of ETH to buy should not exceed the ETH liquidity cap
+        if (balances.x + adjustedXIn > params.cap) {
+            adjustedXIn = params.cap - balances.x;
+            sendEther(msg.sender, xIn - adjustedXIn);
+        }
+
+        uint256 quote = getQuote(adjustedXIn, 0);
 
         out = quote;
         require(out > 0, "INVALID_OUT");
