@@ -78,11 +78,12 @@ contract MarketCurve {
         require(status == Status.Trading, "NOT_TRADING");
         require(msg.value == xIn, "INVALID_VALUE_SENT");
 
-        uint256 adjustedXIn = xIn;
+        uint256 fee = (xIn * feeParams.tradeFee) / feeParams.BASIS_POINTS;
+        uint256 adjustedXIn = xIn - fee;
         // The amount of ETH to buy should not exceed the ETH liquidity cap
         if (balances.x + adjustedXIn > params.cap) {
             adjustedXIn = params.cap - balances.x;
-            sendEther(msg.sender, xIn - adjustedXIn);
+            sendEther(msg.sender, xIn - adjustedXIn - fee);
         }
 
         uint256 quote = getQuote(adjustedXIn, 0);
@@ -101,6 +102,7 @@ contract MarketCurve {
         }
 
         token.transfer(msg.sender, out);
+        sendEther(feeParams.feeTo, fee);
     }
 
     function sell(uint256 yIn) public onlyTrading nonZeroIn(yIn) returns (uint256 out) {
@@ -111,6 +113,8 @@ contract MarketCurve {
 
         out = quote;
         require(quote > 0, "INVALID_QUOTE");
+        uint256 fee = (out * feeParams.tradeFee) / feeParams.BASIS_POINTS;
+        uint256 adjustedOut = out - fee;
 
         balances.x -= out;
         balances.y += yIn;
@@ -119,7 +123,8 @@ contract MarketCurve {
         params.yVirtualReserve += yIn;
 
         token.transferFrom(msg.sender, address(this), yIn);
-        sendEther(msg.sender, out);
+        sendEther(msg.sender, adjustedOut);
+        sendEther(feeParams.feeTo, fee);
     }
 
     function graduate() public {
