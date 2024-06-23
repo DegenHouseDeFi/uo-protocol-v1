@@ -131,8 +131,12 @@ contract MarketCurve {
         require(status == Status.CapReached, "NOT_CAP_REACHED");
         status = Status.Graduated;
         token.approve(address(dexAdapter), params.yReservedForLP);
-        dexAdapter.createPairAndAddLiquidityETH{value: balances.x}(
-            address(token), balances.x, params.yReservedForLP, BURN_ADDRESS
+
+        uint256 xToLP = balances.x - feeParams.graduationFee;
+        sendEther(feeParams.feeTo, feeParams.graduationFee);
+
+        dexAdapter.createPairAndAddLiquidityETH{value: xToLP}(
+            address(token), xToLP, params.yReservedForLP, BURN_ADDRESS
         );
     }
 
