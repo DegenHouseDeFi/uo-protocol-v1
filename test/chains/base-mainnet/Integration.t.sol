@@ -13,6 +13,7 @@ contract BaseIntegrationTest is Test {
     address constant FACTORY = address(0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6);
     address constant ROUTER = address(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24);
 
+    uint256 constant initiationFee = 0.0015 ether;
     uint256 constant liquidityCap = 3.744 ether;
     uint256 constant xStartVirtualReserve = 1.296 ether;
     uint256 constant yStartVirtualReserve = 1_080_000_000 ether;
@@ -25,6 +26,7 @@ contract BaseIntegrationTest is Test {
     function setUp() public {
         factory = new MarketFactory(
             MarketFactory.MarketParameters({
+                initiationFee: initiationFee,
                 liquidityCap: liquidityCap,
                 xStartVirtualReserve: xStartVirtualReserve,
                 yStartVirtualReserve: yStartVirtualReserve,
@@ -32,6 +34,7 @@ contract BaseIntegrationTest is Test {
                 yReservedForLP: yReservedForLP,
                 yReservedForCurve: yReservedForCurve
             }),
+            address(this),
             WETH,
             FACTORY,
             ROUTER

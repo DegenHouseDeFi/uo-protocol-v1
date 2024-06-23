@@ -12,9 +12,14 @@ contract MarketFactoryTest is Test {
     address constant FACTORY = address(0);
     address constant ROUTER = address(0);
 
+    receive() external payable {}
+
+    uint256 constant initiationFee = 0.0015 ether;
+
     function setUp() public {
         factory = new MarketFactory(
             MarketFactory.MarketParameters({
+                initiationFee: initiationFee,
                 liquidityCap: 3.744 ether,
                 xStartVirtualReserve: 1.296 ether,
                 yStartVirtualReserve: 1_080_000_000 ether,
@@ -22,6 +27,7 @@ contract MarketFactoryTest is Test {
                 yReservedForLP: 200_000_000 ether,
                 yReservedForCurve: 800_000_000 ether
             }),
+            address(this),
             WETH,
             FACTORY,
             ROUTER
@@ -29,7 +35,7 @@ contract MarketFactoryTest is Test {
     }
 
     function test_MarketCreated() public {
-        factory.createMarket("Test Token", "TT");
+        factory.createMarket{value: initiationFee}("Test Token", "TT");
         MarketToken token = MarketToken(factory.allTokens(0));
         MarketCurve curve = MarketCurve(factory.tokenToCurve(token));
 
