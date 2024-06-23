@@ -23,6 +23,10 @@ contract MarketCurveTest is Test {
     uint256 public constant yReservedForCurve = 800_000_000 ether;
     uint256 public constant yToMint = 1_000_000_000 ether;
 
+    uint256 public constant BASIS_POINTS = 10_000;
+    uint256 public constant tradeFee = 100;
+    uint256 public constant graduationFee = 0;
+
     function setUp() public {
         curve = new MarketCurve(
             MarketCurve.CurveParameters({
@@ -32,7 +36,12 @@ contract MarketCurveTest is Test {
                 yReservedForLP: yReservedForLP,
                 yReservedForCurve: yReservedForCurve
             }),
-            MarketCurve.FeeParamters({feeTo: address(this), BASIS_POINTS: 10_000, tradeFee: 100, graduationFee: 0})
+            MarketCurve.FeeParamters({
+                feeTo: address(0x0),
+                BASIS_POINTS: BASIS_POINTS,
+                tradeFee: tradeFee,
+                graduationFee: graduationFee
+            })
         );
 
         token = new MarketToken("Test Token", "TT", address(curve), yToMint);
@@ -89,7 +98,11 @@ contract MarketCurveTest is Test {
     function test_buyTokenWithOneEther() public {
         curve.initialiseCurve(token, adapter);
 
-        uint256 quote = curve.getQuote(1 ether, 0);
+        uint256 toSell = 1 ether;
+        uint256 fee = (toSell * tradeFee) / BASIS_POINTS;
+        uint256 toSellAdjusted = toSell - fee;
+
+        uint256 quote = curve.getQuote(toSellAdjusted, 0);
         token.approve(address(curve), quote);
 
         (uint256 xReserveBefore, uint256 yReserveBefore) = curve.getReserves();
@@ -98,22 +111,21 @@ contract MarketCurveTest is Test {
         uint256 ethBalanceSelfBefore = address(this).balance;
         uint256 tokenBalanceSelfBefore = token.balanceOf(address(this));
 
-        curve.buy{value: 1 ether}(1 ether);
+        curve.buy{value: toSell}(toSell);
 
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
         (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();
 
         uint256 ethBalanceSelfAfter = address(this).balance;
         uint256 tokenBalanceSelfAfter = token.balanceOf(address(this));
+        assertEq(xReserveAfter - xReserveBefore, toSellAdjusted, "xReserveImbalance");
+        assertEq(yReserveBefore - yReserveAfter, quote, "yReserveImbalance");
 
-        assertEq(xReserveAfter - xReserveBefore, 1 ether);
-        assertEq(yReserveBefore - yReserveAfter, quote);
+        assertEq(xBalanceAfter - xBalanceBefore, toSellAdjusted, "xBalanceImbalance");
+        assertEq(yBalanceBefore - yBalanceAfter, quote, "yBalanceImbalance");
 
-        assertEq(xBalanceAfter - xBalanceBefore, 1 ether);
-        assertEq(yBalanceBefore - yBalanceAfter, quote);
-
-        assertEq(ethBalanceSelfBefore - ethBalanceSelfAfter, 1 ether);
-        assertEq(tokenBalanceSelfAfter - tokenBalanceSelfBefore, quote);
+        assertEq(ethBalanceSelfBefore - ethBalanceSelfAfter, 1 ether, "ethBalanceImbalance");
+        assertEq(tokenBalanceSelfAfter - tokenBalanceSelfBefore, quote, "tokenBalanceImbalance");
     }
 
     function test_sellTokenForOneEther() public {
@@ -125,6 +137,7 @@ contract MarketCurveTest is Test {
         token.approve(address(curve), tokensToSell);
 
         uint256 quote = curve.getQuote(0, tokensToSell);
+        uint256 adjustedQuote = quote - (quote * tradeFee) / BASIS_POINTS;
 
         (uint256 xReserveBefore, uint256 yReserveBefore) = curve.getReserves();
         (uint256 xBalanceBefore, uint256 yBalanceBefore) = curve.getBalances();
@@ -137,17 +150,14 @@ contract MarketCurveTest is Test {
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
         (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();
 
-        uint256 ethBalanceSelfAfter = address(this).balance;
-        uint256 tokenBalanceSelfAfter = token.balanceOf(address(this));
+        assertEq(xReserveBefore - xReserveAfter, quote, "xReserveImbalance");
+        assertEq(yReserveAfter - yReserveBefore, tokensToSell, "yReserveImbalance");
 
-        assertEq(xReserveBefore - xReserveAfter, quote);
-        assertEq(yReserveAfter - yReserveBefore, tokensToSell);
+        assertEq(xBalanceBefore - xBalanceAfter, quote, "xBalanceImbalance");
+        assertEq(yBalanceAfter - yBalanceBefore, tokensToSell, "yBalanceImbalance");
 
-        assertEq(xBalanceBefore - xBalanceAfter, quote);
-        assertEq(yBalanceAfter - yBalanceBefore, tokensToSell);
-
-        assertEq(ethBalanceSelfAfter - ethBalanceSelfBefore, quote);
-        assertEq(tokenBalanceSelfBefore - tokenBalanceSelfAfter, tokensToSell);
+        assertEq(address(this).balance - ethBalanceSelfBefore, adjustedQuote, "ethBalanceImbalance");
+        assertEq(tokenBalanceSelfBefore - token.balanceOf(address(this)), tokensToSell, "tokenBalanceImbalance");
     }
 
     function test_tokenCapReach() public {
