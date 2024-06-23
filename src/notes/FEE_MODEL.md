@@ -5,10 +5,10 @@ UpOnly Protocol accrues a fees on the following actions:
 2. On every trade.
 3. On every token graduation event. 
 
-## Token Creation Fee
+## Token Creation Fee ✅
 Every time a token is created, the protocol will charge a __fee of ~$5 in ETH__. Currently, the number in ETH comes out to be __0.0015 ETH__.
 
-## Trade Fee
+## Trade Fee 
 
 The protocol will charge a __1% fee on every trade__. 
 

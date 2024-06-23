@@ -27,6 +27,13 @@ contract MarketCurve {
         uint256 yReservedForCurve; // amount of created tokens to sell through the curve
     }
 
+    struct FeeParamters {
+        address feeTo;
+        uint16 BASIS_POINTS;
+        uint16 tradeFee;
+        uint16 graduationFee;
+    }
+
     struct Balances {
         uint256 x;
         uint256 y;
@@ -35,16 +42,18 @@ contract MarketCurve {
     //////////////////// VARIABLES ////////////////////
     address public mom;
     Status public status;
+    address public feeTo;
     MarketToken public token;
     Balances public balances;
     CurveParameters public params;
+    FeeParamters public feeParams;
     UniswapV2LiquidityAdapter public dexAdapter;
 
     //////////////////// CONSTANTS ////////////////////
     address constant BURN_ADDRESS = address(0x0);
 
     //////////////////// CONSTRUCTOR ////////////////////
-    constructor(CurveParameters memory _params) {
+    constructor(CurveParameters memory _params, FeeParamters memory _feeParams) {
         mom = msg.sender;
         params = _params;
         status = Status.Created;

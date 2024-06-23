@@ -14,7 +14,6 @@ import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
 contract MarketFactory is Ownable {
     //////////////////// DATA STRUCTURES ////////////////////
     struct MarketParameters {
-        uint256 initiationFee; // fee to create a new market
         uint256 liquidityCap; // amount of ETH to be raised before moving to a DEX
         uint256 xStartVirtualReserve; // initial virtual reserve for ETH
         uint256 yStartVirtualReserve; // initial virtual reserve for created token
@@ -23,31 +22,40 @@ contract MarketFactory is Ownable {
         uint256 yReservedForCurve; // Amount of created tokens to sell through the curve
     }
 
+    struct FeeParameters {
+        address feeTo;
+        uint16 BASIS_POINTS;
+        uint256 initiationFee;
+        uint16 tradeFee;
+        uint16 graduationFee;
+    }
+
     //////////////////// EVENTS ////////////////////
     event MarketCreated(address creator, string name, address token, address curve);
 
-    //////////////////// CONSTANTS ////////////////////
-    uint256 constant BASIS_POINTS = 10000;
-
     //////////////////// VARIABLES ////////////////////
-    address public feeTo;
     address[] public allTokens;
     MarketParameters public params;
+    FeeParameters public feeParams;
     UniswapV2LiquidityAdapter public dexAdapter;
     mapping(MarketToken => MarketCurve) public tokenToCurve;
 
     //////////////////// CONSTRUCTOR ////////////////////
-    constructor(MarketParameters memory _params, address _feeTo, address _WETH, address _v2Factory, address _v2Router)
-        Ownable(msg.sender)
-    {
-        feeTo = _feeTo;
+    constructor(
+        MarketParameters memory _params,
+        FeeParameters memory _feeParams,
+        address _WETH,
+        address _v2Factory,
+        address _v2Router
+    ) Ownable(msg.sender) {
         params = _params;
+        feeParams = _feeParams;
         dexAdapter = new UniswapV2LiquidityAdapter(_WETH, _v2Factory, _v2Router);
     }
 
     //////////////////// FUNCTIONS ////////////////////
     function createMarket(string calldata name, string calldata symbol) public payable {
-        require(msg.value == params.initiationFee, "INVALID_FEE");
+        require(msg.value == feeParams.initiationFee, "INVALID_FEE");
 
         MarketCurve curve = new MarketCurve(
             MarketCurve.CurveParameters({
@@ -56,10 +64,16 @@ contract MarketFactory is Ownable {
                 yVirtualReserve: params.yStartVirtualReserve,
                 yReservedForLP: params.yReservedForLP,
                 yReservedForCurve: params.yReservedForCurve
+            }),
+            MarketCurve.FeeParamters({
+                feeTo: feeParams.feeTo,
+                BASIS_POINTS: feeParams.BASIS_POINTS,
+                tradeFee: feeParams.tradeFee,
+                graduationFee: feeParams.graduationFee
             })
         );
 
-        sendEther(feeTo, params.initiationFee);
+        sendEther(feeParams.feeTo, feeParams.initiationFee);
 
         MarketToken token = new MarketToken(name, symbol, address(curve), params.yMintAmount);
         curve.initialiseCurve(token, dexAdapter);
@@ -91,12 +105,18 @@ contract MarketFactory is Ownable {
         params.yReservedForCurve = _yReservedForCurve;
     }
 
-    function updateInitiationFee(uint256 _initiationFee) public onlyOwner {
-        params.initiationFee = _initiationFee;
-    }
-
-    function updateFeeTo(address _feeTo) public onlyOwner {
-        feeTo = _feeTo;
+    function updateFeeParams(
+        address _feeTo,
+        uint16 _BASIS_POINTS,
+        uint256 _initiationFee,
+        uint16 _tradeFee,
+        uint16 _graduationFee
+    ) public onlyOwner {
+        feeParams.feeTo = _feeTo;
+        feeParams.BASIS_POINTS = _BASIS_POINTS;
+        feeParams.initiationFee = _initiationFee;
+        feeParams.tradeFee = _tradeFee;
+        feeParams.graduationFee = _graduationFee;
     }
 
     function sendEther(address to, uint256 amount) internal {
