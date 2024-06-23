@@ -24,10 +24,10 @@ contract MarketFactory is Ownable {
 
     struct FeeParameters {
         address feeTo;
-        uint16 BASIS_POINTS;
+        uint256 BASIS_POINTS;
         uint256 initiationFee;
-        uint16 tradeFee;
-        uint16 graduationFee;
+        uint256 tradeFee;
+        uint256 graduationFee;
     }
 
     //////////////////// EVENTS ////////////////////

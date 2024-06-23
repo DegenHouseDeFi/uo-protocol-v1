@@ -29,9 +29,9 @@ contract MarketCurve {
 
     struct FeeParamters {
         address feeTo;
-        uint16 BASIS_POINTS;
-        uint16 tradeFee;
-        uint16 graduationFee;
+        uint256 BASIS_POINTS;
+        uint256 tradeFee;
+        uint256 graduationFee;
     }
 
     struct Balances {
@@ -42,7 +42,6 @@ contract MarketCurve {
     //////////////////// VARIABLES ////////////////////
     address public mom;
     Status public status;
-    address public feeTo;
     MarketToken public token;
     Balances public balances;
     CurveParameters public params;
@@ -56,6 +55,7 @@ contract MarketCurve {
     constructor(CurveParameters memory _params, FeeParamters memory _feeParams) {
         mom = msg.sender;
         params = _params;
+        feeParams = _feeParams;
         status = Status.Created;
     }
 

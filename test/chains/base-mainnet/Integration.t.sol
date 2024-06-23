@@ -26,7 +26,6 @@ contract BaseIntegrationTest is Test {
     function setUp() public {
         factory = new MarketFactory(
             MarketFactory.MarketParameters({
-                initiationFee: initiationFee,
                 liquidityCap: liquidityCap,
                 xStartVirtualReserve: xStartVirtualReserve,
                 yStartVirtualReserve: yStartVirtualReserve,
@@ -34,7 +33,13 @@ contract BaseIntegrationTest is Test {
                 yReservedForLP: yReservedForLP,
                 yReservedForCurve: yReservedForCurve
             }),
-            address(this),
+            MarketFactory.FeeParameters({
+                feeTo: address(this),
+                BASIS_POINTS: 10_000,
+                initiationFee: initiationFee,
+                tradeFee: 100,
+                graduationFee: 0
+            }),
             WETH,
             FACTORY,
             ROUTER

@@ -15,11 +15,11 @@ contract MarketFactoryTest is Test {
     receive() external payable {}
 
     uint256 constant initiationFee = 0.0015 ether;
+    uint256 constant graduationFee = 0.005 ether;
 
     function setUp() public {
         factory = new MarketFactory(
             MarketFactory.MarketParameters({
-                initiationFee: initiationFee,
                 liquidityCap: 3.744 ether,
                 xStartVirtualReserve: 1.296 ether,
                 yStartVirtualReserve: 1_080_000_000 ether,
@@ -27,7 +27,13 @@ contract MarketFactoryTest is Test {
                 yReservedForLP: 200_000_000 ether,
                 yReservedForCurve: 800_000_000 ether
             }),
-            address(this),
+            MarketFactory.FeeParameters({
+                feeTo: address(this),
+                BASIS_POINTS: 10_000,
+                initiationFee: initiationFee,
+                tradeFee: 100,
+                graduationFee: graduationFee
+            }),
             WETH,
             FACTORY,
             ROUTER

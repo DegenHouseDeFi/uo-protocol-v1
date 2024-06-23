@@ -31,7 +31,8 @@ contract MarketCurveTest is Test {
                 yVirtualReserve: yInitialVirtualReserve,
                 yReservedForLP: yReservedForLP,
                 yReservedForCurve: yReservedForCurve
-            })
+            }),
+            MarketCurve.FeeParamters({feeTo: address(this), BASIS_POINTS: 10_000, tradeFee: 100, graduationFee: 0})
         );
 
         token = new MarketToken("Test Token", "TT", address(curve), yToMint);
