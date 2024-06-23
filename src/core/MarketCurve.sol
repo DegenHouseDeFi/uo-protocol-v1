@@ -179,6 +179,10 @@ contract MarketCurve {
         require(sent, "Failed to send Ether");
     }
 
+    function updateFeeParams(FeeParamters memory _feeParams) public onlyMom {
+        feeParams = _feeParams;
+    }
+
     //////////////////// MODIFIERS ////////////////////
     modifier onlyMom() {
         require(msg.sender == mom, "ONLY_MOM");
