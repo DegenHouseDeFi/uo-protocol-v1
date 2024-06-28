@@ -92,8 +92,7 @@ contract MarketCurve {
     }
 
     function buy(uint256 xIn, uint256 yMinOut) external payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
-        // Flaw: There are no protections against the user overspending `x` to buy the available `y`
-        if (xIn == 0 || msg.value != xIn) {
+        if (msg.value != xIn) {
             revert Curve_InvalidInputAmount(xIn);
         }
 
@@ -129,10 +128,6 @@ contract MarketCurve {
     }
 
     function sell(uint256 yIn, uint256 xMinOut) external onlyTrading nonZeroIn(yIn) returns (uint256 out) {
-        if (yIn == 0) {
-            revert Curve_InvalidInputAmount(yIn);
-        }
-
         uint256 quote = getQuote(0, yIn);
 
         out = quote;
