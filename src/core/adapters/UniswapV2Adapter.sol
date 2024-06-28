@@ -7,6 +7,10 @@ import {IUniswapV2Factory} from "../../interfaces/uniswapV2/IUniswapV2Factory.so
 import {IUniswapV2Router02} from "../../interfaces/uniswapV2/IUniswapV2Router02.sol";
 
 contract UniswapV2LiquidityAdapter {
+    event PairCreatedAndLiquidityAdded(
+        address indexed token, address pair, address indexed to, uint256 xToSupply, uint256 yToSupply
+    );
+
     error InsufficientETH();
 
     address public immutable WETH;
@@ -33,5 +37,7 @@ contract UniswapV2LiquidityAdapter {
         MarketToken(token).transferFrom(msg.sender, address(this), yToSupply);
         MarketToken(token).approve(address(router), yToSupply);
         router.addLiquidityETH{value: xToSupply}(token, yToSupply, 1, 1, to, block.timestamp);
+
+        emit PairCreatedAndLiquidityAdded(token, pair, to, xToSupply, yToSupply);
     }
 }
