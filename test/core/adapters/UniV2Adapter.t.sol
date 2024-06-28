@@ -3,10 +3,10 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 
-import {UniswapV2LiquidityAdapter} from "../../src/core/adapters/UniswapV2Adapter.sol";
-import {MarketToken} from "../../src/core/MarketToken.sol";
+import {UniswapV2LiquidityAdapter} from "../../../src/core/adapters/UniswapV2Adapter.sol";
+import {MarketToken} from "../../../src/core/MarketToken.sol";
 
-import {IUniswapV2Factory} from "../../src/interfaces/uniswapV2/IUniswapV2Factory.sol";
+import {IUniswapV2Factory} from "../../../src/interfaces/uniswapV2/IUniswapV2Factory.sol";
 
 /**
  * @title UniswapV2LiquidityAdapter Test
