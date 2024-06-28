@@ -92,39 +92,40 @@ contract MarketFactory is Ownable {
         emit MarketCreated(msg.sender, name, address(token), address(curve));
     }
 
-    function updateLiquidityCap(uint256 _liquidityCap) public onlyOwner {
-        params.liquidityCap = _liquidityCap;
-    }
+    //////////////////// ADMIN FUNCTIONS ////////////////////
 
-    function updateVirtualReserveConfig(uint256 _xStartVirtualReserve, uint256 _yStartVirtualReserve)
-        public
-        onlyOwner
-    {
-        params.xStartVirtualReserve = _xStartVirtualReserve;
-        params.yStartVirtualReserve = _yStartVirtualReserve;
-    }
-
-    function updateTokenParams(uint256 _yMintAmount, uint256 _yReservedForLP, uint256 _yReservedForCurve)
-        public
-        onlyOwner
-    {
-        params.yMintAmount = _yMintAmount;
-        params.yReservedForLP = _yReservedForLP;
-        params.yReservedForCurve = _yReservedForCurve;
+    function updateMarketParams(
+        uint256 _liquidityCap,
+        uint256 _xStartVirtualReserve,
+        uint256 _yStartVirtualReserve,
+        uint256 _yMintAmount,
+        uint256 _yReservedForLP,
+        uint256 _yReservedForCurve
+    ) external onlyOwner {
+        params = MarketParameters({
+            liquidityCap: _liquidityCap,
+            xStartVirtualReserve: _xStartVirtualReserve,
+            yStartVirtualReserve: _yStartVirtualReserve,
+            yMintAmount: _yMintAmount,
+            yReservedForLP: _yReservedForLP,
+            yReservedForCurve: _yReservedForCurve
+        });
     }
 
     function updateFeeParams(
         address _feeTo,
-        uint16 _BASIS_POINTS,
+        uint256 _BASIS_POINTS,
         uint256 _initiationFee,
-        uint16 _tradeFee,
-        uint16 _graduationFee
-    ) public onlyOwner {
-        feeParams.feeTo = _feeTo;
-        feeParams.BASIS_POINTS = _BASIS_POINTS;
-        feeParams.initiationFee = _initiationFee;
-        feeParams.tradeFee = _tradeFee;
-        feeParams.graduationFee = _graduationFee;
+        uint256 _tradeFee,
+        uint256 _graduationFee
+    ) external onlyOwner {
+        feeParams = FeeParameters({
+            feeTo: _feeTo,
+            BASIS_POINTS: _BASIS_POINTS,
+            initiationFee: _initiationFee,
+            tradeFee: _tradeFee,
+            graduationFee: _graduationFee
+        });
     }
 
     function sendEther(address to, uint256 amount) internal {
