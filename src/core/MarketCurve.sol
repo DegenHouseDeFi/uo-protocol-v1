@@ -11,6 +11,15 @@ import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
  * @dev This contract is designed to ONLY work with the MarketToken contract
  */
 contract MarketCurve {
+    ////////////// ERRORS //////////////
+    error Curve_InvalidBalance(uint256 expected, uint256 actual);
+    error Curve_InvalidStatus(Status expected, Status actual);
+    error Curve_InvalidInputAmount(uint256 amount);
+    error Curve_InvalidOutputAmount(uint256 amount);
+    error Curve_InvalidInputAmounts();
+    error Curve_FailedEtherTransfer();
+    error Curve_NotMOM();
+
     //////////////////// DATA STRUCTURES ////////////////////
     enum Status {
         Created,
@@ -67,7 +76,9 @@ contract MarketCurve {
 
         uint256 balanceY = token.balanceOf(address(this));
         // @notice: This check might be redundant as the contract is assumed to work only with MarketToken.
-        require(balanceY == params.yReservedForCurve + params.yReservedForLP, "INVALID_BALANCE");
+        if (balanceY != params.yReservedForCurve + params.yReservedForLP) {
+            revert Curve_InvalidBalance(params.yReservedForCurve + params.yReservedForLP, balanceY);
+        }
 
         balances.x = 0;
         balances.y = balanceY - params.yReservedForLP;
@@ -75,9 +86,9 @@ contract MarketCurve {
 
     function buy(uint256 xIn, uint256 yMinOut) public payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
         // Flaw: There are no protections against the user overspending `x` to buy the available `y`
-        require(xIn > 0, "INVALID_IN");
-        require(status == Status.Trading, "NOT_TRADING");
-        require(msg.value == xIn, "INVALID_VALUE_SENT");
+        if (xIn == 0 || msg.value != xIn) {
+            revert Curve_InvalidInputAmount(xIn);
+        }
 
         uint256 fee = (xIn * feeParams.tradeFee) / feeParams.BASIS_POINTS;
         uint256 adjustedXIn = xIn - fee;
@@ -90,7 +101,9 @@ contract MarketCurve {
         uint256 quote = getQuote(adjustedXIn, 0);
 
         out = quote;
-        require(out >= yMinOut, "INVALID_OUT");
+        if (out < yMinOut) {
+            revert Curve_InvalidOutputAmount(out);
+        }
 
         balances.x += adjustedXIn;
         balances.y -= out;
@@ -107,13 +120,17 @@ contract MarketCurve {
     }
 
     function sell(uint256 yIn, uint256 xMinOut) public onlyTrading nonZeroIn(yIn) returns (uint256 out) {
-        require(yIn > 0, "INVALID_IN");
-        require(status == Status.Trading, "NOT_TRADING");
+        if (yIn == 0) {
+            revert Curve_InvalidInputAmount(yIn);
+        }
 
         uint256 quote = getQuote(0, yIn);
 
         out = quote;
-        require(quote >= xMinOut, "INVALID_QUOTE");
+        if (out < xMinOut) {
+            revert Curve_InvalidOutputAmount(out);
+        }
+
         uint256 fee = (out * feeParams.tradeFee) / feeParams.BASIS_POINTS;
         uint256 adjustedOut = out - fee;
 
@@ -129,7 +146,9 @@ contract MarketCurve {
     }
 
     function graduate() public {
-        require(status == Status.CapReached, "NOT_CAP_REACHED");
+        if (status != Status.CapReached) {
+            revert Curve_InvalidStatus(Status.CapReached, status);
+        }
         status = Status.Graduated;
         token.approve(address(dexAdapter), params.yReservedForLP);
 
@@ -142,7 +161,9 @@ contract MarketCurve {
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
-        require(xAmountIn == 0 || yAmountIn == 0, "ONE_TOKEN_ONLY");
+        if (xAmountIn > 0 && yAmountIn > 0) {
+            revert Curve_InvalidInputAmounts();
+        }
 
         (uint256 xReserve, uint256 yReserve) = (params.xVirtualReserve, params.yVirtualReserve);
 
@@ -186,7 +207,9 @@ contract MarketCurve {
 
     function sendEther(address to, uint256 amount) internal {
         (bool sent,) = to.call{value: amount}("");
-        require(sent, "Failed to send Ether");
+        if (!sent) {
+            revert Curve_FailedEtherTransfer();
+        }
     }
 
     function updateFeeParams(FeeParamters memory _feeParams) public onlyMom {
@@ -195,17 +218,23 @@ contract MarketCurve {
 
     //////////////////// MODIFIERS ////////////////////
     modifier onlyMom() {
-        require(msg.sender == mom, "ONLY_MOM");
+        if (msg.sender != mom) {
+            revert Curve_NotMOM();
+        }
         _;
     }
 
     modifier nonZeroIn(uint256 _in) {
-        require(_in > 0, "INVALID_IN");
+        if (_in == 0) {
+            revert Curve_InvalidInputAmount(_in);
+        }
         _;
     }
 
     modifier onlyTrading() {
-        require(status == Status.Trading, "NOT_TRADING");
+        if (status != Status.Trading) {
+            revert Curve_InvalidStatus(Status.Trading, status);
+        }
         _;
     }
 }
