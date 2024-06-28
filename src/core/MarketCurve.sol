@@ -212,10 +212,6 @@ contract MarketCurve {
         }
     }
 
-    function updateFeeParams(FeeParamters memory _feeParams) public onlyMom {
-        feeParams = _feeParams;
-    }
-
     //////////////////// MODIFIERS ////////////////////
     modifier onlyMom() {
         if (msg.sender != mom) {

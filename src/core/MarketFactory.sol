@@ -14,6 +14,17 @@ import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
 contract MarketFactory is Ownable {
     //////////////////// EVENTS ////////////////////
     event MarketCreated(address creator, string name, address token, address curve);
+    event MarketParametersUpdated(
+        uint256 liquidityCap,
+        uint256 xStartVirtualReserve,
+        uint256 yStartVirtualReserve,
+        uint256 yMintAmount,
+        uint256 yReservedForLP,
+        uint256 yReservedForCurve
+    );
+    event FeeParametersUpdated(
+        address feeTo, uint256 BASIS_POINTS, uint256 initiationFee, uint256 tradeFee, uint256 graduationFee
+    );
 
     //////////////////// ERRORS ////////////////////
     error Factory_InvalidFee(uint256 expected, uint256 received);
@@ -110,6 +121,15 @@ contract MarketFactory is Ownable {
             yReservedForLP: _yReservedForLP,
             yReservedForCurve: _yReservedForCurve
         });
+
+        emit MarketParametersUpdated(
+            _liquidityCap,
+            _xStartVirtualReserve,
+            _yStartVirtualReserve,
+            _yMintAmount,
+            _yReservedForLP,
+            _yReservedForCurve
+        );
     }
 
     function updateFeeParams(
@@ -126,8 +146,11 @@ contract MarketFactory is Ownable {
             tradeFee: _tradeFee,
             graduationFee: _graduationFee
         });
+
+        emit FeeParametersUpdated(_feeTo, _BASIS_POINTS, _initiationFee, _tradeFee, _graduationFee);
     }
 
+    //////////////////// UTILITY FUNCTIONS ////////////////////
     function sendEther(address to, uint256 amount) internal {
         (bool sent,) = to.call{value: amount}("");
         if (!sent) {
