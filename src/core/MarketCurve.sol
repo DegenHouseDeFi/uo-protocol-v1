@@ -11,6 +11,11 @@ import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
  * @dev This contract is designed to ONLY work with the MarketToken contract
  */
 contract MarketCurve {
+    ////////////// EVENTS //////////////
+    event CurveInitialised(address token, address dexAdapter);
+    event Trade(address indexed trader, bool indexed isBuy, uint256 xAmount, uint256 yAmount);
+    event Graduated(address indexed token, address indexed dexPair);
+
     ////////////// ERRORS //////////////
     error Curve_InvalidBalance(uint256 expected, uint256 actual);
     error Curve_InvalidStatus(Status expected, Status actual);
@@ -82,6 +87,8 @@ contract MarketCurve {
 
         balances.x = 0;
         balances.y = balanceY - params.yReservedForLP;
+
+        emit CurveInitialised(address(token), address(dexAdapter));
     }
 
     function buy(uint256 xIn, uint256 yMinOut) public payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
@@ -117,6 +124,8 @@ contract MarketCurve {
 
         token.transfer(msg.sender, out);
         sendEther(feeParams.feeTo, fee);
+
+        emit Trade(msg.sender, true, adjustedXIn, out);
     }
 
     function sell(uint256 yIn, uint256 xMinOut) public onlyTrading nonZeroIn(yIn) returns (uint256 out) {
@@ -143,6 +152,8 @@ contract MarketCurve {
         token.transferFrom(msg.sender, address(this), yIn);
         sendEther(msg.sender, adjustedOut);
         sendEther(feeParams.feeTo, fee);
+
+        emit Trade(msg.sender, false, adjustedOut, yIn);
     }
 
     function graduate() public {
@@ -158,6 +169,8 @@ contract MarketCurve {
         dexAdapter.createPairAndAddLiquidityETH{value: xToLP}(
             address(token), xToLP, params.yReservedForLP, BURN_ADDRESS
         );
+
+        emit Graduated(address(token), address(dexAdapter));
     }
 
     function getQuote(uint256 xAmountIn, uint256 yAmountIn) public view returns (uint256 quote) {
