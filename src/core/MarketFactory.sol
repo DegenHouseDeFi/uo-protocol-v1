@@ -25,6 +25,7 @@ contract MarketFactory is Ownable {
     event FeeParametersUpdated(
         address feeTo, uint256 BASIS_POINTS, uint256 initiationFee, uint256 tradeFee, uint256 graduationFee
     );
+    event DexAdapterUpdated(address adapter);
 
     //////////////////// ERRORS ////////////////////
     error Factory_InvalidFee(uint256 expected, uint256 received);
@@ -152,6 +153,7 @@ contract MarketFactory is Ownable {
 
     function newDexAdapter(address _WETH, address _v2Factory, address _v2Router) external onlyOwner {
         dexAdapter = new UniswapV2LiquidityAdapter(_WETH, _v2Factory, _v2Router);
+        emit DexAdapterUpdated(address(dexAdapter));
     }
 
     //////////////////// UTILITY FUNCTIONS ////////////////////
