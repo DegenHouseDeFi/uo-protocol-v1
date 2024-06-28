@@ -7,6 +7,8 @@ import {IUniswapV2Factory} from "../../interfaces/uniswapV2/IUniswapV2Factory.so
 import {IUniswapV2Router02} from "../../interfaces/uniswapV2/IUniswapV2Router02.sol";
 
 contract UniswapV2LiquidityAdapter {
+    error InsufficientETH();
+
     address public immutable WETH;
     IUniswapV2Factory public immutable factory;
     IUniswapV2Router02 public immutable router;
@@ -21,7 +23,7 @@ contract UniswapV2LiquidityAdapter {
         external
         payable
     {
-        require(msg.value >= xToSupply, "INSUFFICIENT_ETH");
+        if (msg.value < xToSupply) revert InsufficientETH();
 
         address pair = IUniswapV2Factory(factory).getPair(token, WETH);
         if (pair == address(0)) {
