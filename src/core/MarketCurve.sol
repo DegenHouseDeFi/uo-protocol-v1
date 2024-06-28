@@ -74,7 +74,7 @@ contract MarketCurve {
     }
 
     //////////////////// FUNCTIONS ////////////////////
-    function initialiseCurve(MarketToken _token, UniswapV2LiquidityAdapter _dexAdapter) public onlyMom {
+    function initialiseCurve(MarketToken _token, UniswapV2LiquidityAdapter _dexAdapter) external onlyMom {
         token = _token;
         dexAdapter = _dexAdapter;
         status = Status.Trading;
@@ -91,7 +91,7 @@ contract MarketCurve {
         emit CurveInitialised(address(token), address(dexAdapter));
     }
 
-    function buy(uint256 xIn, uint256 yMinOut) public payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
+    function buy(uint256 xIn, uint256 yMinOut) external payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
         // Flaw: There are no protections against the user overspending `x` to buy the available `y`
         if (xIn == 0 || msg.value != xIn) {
             revert Curve_InvalidInputAmount(xIn);
@@ -128,7 +128,7 @@ contract MarketCurve {
         emit Trade(msg.sender, true, adjustedXIn, out);
     }
 
-    function sell(uint256 yIn, uint256 xMinOut) public onlyTrading nonZeroIn(yIn) returns (uint256 out) {
+    function sell(uint256 yIn, uint256 xMinOut) external onlyTrading nonZeroIn(yIn) returns (uint256 out) {
         if (yIn == 0) {
             revert Curve_InvalidInputAmount(yIn);
         }
@@ -156,7 +156,7 @@ contract MarketCurve {
         emit Trade(msg.sender, false, adjustedOut, yIn);
     }
 
-    function graduate() public {
+    function graduate() external {
         if (status != Status.CapReached) {
             revert Curve_InvalidStatus(Status.CapReached, status);
         }

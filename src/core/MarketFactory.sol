@@ -70,7 +70,7 @@ contract MarketFactory is Ownable {
     }
 
     //////////////////// FUNCTIONS ////////////////////
-    function createMarket(string calldata name, string calldata symbol) public payable {
+    function createMarket(string calldata name, string calldata symbol) external payable {
         if (msg.value != feeParams.initiationFee) {
             revert Factory_InvalidFee({expected: feeParams.initiationFee, received: msg.value});
         }
