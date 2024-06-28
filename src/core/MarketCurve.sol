@@ -66,13 +66,14 @@ contract MarketCurve {
         status = Status.Trading;
 
         uint256 balanceY = token.balanceOf(address(this));
+        // @notice: This check might be redundant as the contract is assumed to work only with MarketToken.
         require(balanceY == params.yReservedForCurve + params.yReservedForLP, "INVALID_BALANCE");
 
         balances.x = 0;
         balances.y = balanceY - params.yReservedForLP;
     }
 
-    function buy(uint256 xIn) public payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
+    function buy(uint256 xIn, uint256 yMinOut) public payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
         // Flaw: There are no protections against the user overspending `x` to buy the available `y`
         require(xIn > 0, "INVALID_IN");
         require(status == Status.Trading, "NOT_TRADING");
@@ -89,7 +90,7 @@ contract MarketCurve {
         uint256 quote = getQuote(adjustedXIn, 0);
 
         out = quote;
-        require(out > 0, "INVALID_OUT");
+        require(out >= yMinOut, "INVALID_OUT");
 
         balances.x += adjustedXIn;
         balances.y -= out;
@@ -105,14 +106,14 @@ contract MarketCurve {
         sendEther(feeParams.feeTo, fee);
     }
 
-    function sell(uint256 yIn) public onlyTrading nonZeroIn(yIn) returns (uint256 out) {
+    function sell(uint256 yIn, uint256 xMinOut) public onlyTrading nonZeroIn(yIn) returns (uint256 out) {
         require(yIn > 0, "INVALID_IN");
         require(status == Status.Trading, "NOT_TRADING");
 
         uint256 quote = getQuote(0, yIn);
 
         out = quote;
-        require(quote > 0, "INVALID_QUOTE");
+        require(quote >= xMinOut, "INVALID_QUOTE");
         uint256 fee = (out * feeParams.tradeFee) / feeParams.BASIS_POINTS;
         uint256 adjustedOut = out - fee;
 

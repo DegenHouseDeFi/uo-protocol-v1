@@ -74,7 +74,7 @@ contract BaseIntegrationTest is Test {
         console.log("Before: xReserve: %d, yReserve: %d", xReserveBefore, yReserveBefore);
         console.log("Before: xBalance: %d, yBalance: %d", xBalanceBefore, yBalanceBefore);
 
-        uint256 tokensBought = curve.buy{value: amount}(amount);
+        uint256 tokensBought = curve.buy{value: amount}(amount, 1);
 
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
         (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();
@@ -99,7 +99,7 @@ contract BaseIntegrationTest is Test {
         console.log("Before: xBalance: %d, yBalance: %d", xBalanceBefore, yBalanceBefore);
 
         token.approve(address(curve), amount);
-        uint256 ethReceived = curve.sell(amount);
+        uint256 ethReceived = curve.sell(amount, 1);
 
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
         (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();

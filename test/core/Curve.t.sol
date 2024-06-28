@@ -111,7 +111,7 @@ contract MarketCurveTest is Test {
         uint256 ethBalanceSelfBefore = address(this).balance;
         uint256 tokenBalanceSelfBefore = token.balanceOf(address(this));
 
-        curve.buy{value: toSell}(toSell);
+        curve.buy{value: toSell}(toSell, 1);
 
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
         (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();
@@ -132,7 +132,7 @@ contract MarketCurveTest is Test {
         curve.initialiseCurve(token, adapter);
 
         // Need to buy tokens before we can sell.
-        curve.buy{value: 1 ether}(1 ether);
+        curve.buy{value: 1 ether}(1 ether, 1);
         uint256 tokensToSell = token.balanceOf(address(this));
         token.approve(address(curve), tokensToSell);
 
@@ -145,7 +145,7 @@ contract MarketCurveTest is Test {
         uint256 ethBalanceSelfBefore = address(this).balance;
         uint256 tokenBalanceSelfBefore = token.balanceOf(address(this));
 
-        curve.sell(tokensToSell);
+        curve.sell(tokensToSell, 1);
 
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
         (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();
@@ -162,7 +162,7 @@ contract MarketCurveTest is Test {
 
     function test_tokenCapReach() public {
         curve.initialiseCurve(token, adapter);
-        curve.buy{value: 3.8 ether}(3.8 ether);
+        curve.buy{value: 3.8 ether}(3.8 ether, 1);
 
         MarketCurve.Status curveStatus = curve.status();
         assertEq(uint256(curveStatus), uint256(MarketCurve.Status.CapReached));
