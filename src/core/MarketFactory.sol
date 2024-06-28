@@ -150,6 +150,10 @@ contract MarketFactory is Ownable {
         emit FeeParametersUpdated(_feeTo, _BASIS_POINTS, _initiationFee, _tradeFee, _graduationFee);
     }
 
+    function newDexAdapter(address _WETH, address _v2Factory, address _v2Router) external onlyOwner {
+        dexAdapter = new UniswapV2LiquidityAdapter(_WETH, _v2Factory, _v2Router);
+    }
+
     //////////////////// UTILITY FUNCTIONS ////////////////////
     function sendEther(address to, uint256 amount) internal {
         (bool sent,) = to.call{value: amount}("");
