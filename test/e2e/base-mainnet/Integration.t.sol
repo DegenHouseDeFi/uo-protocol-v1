@@ -47,7 +47,7 @@ contract BaseIntegrationTest is Test {
     }
 
     function test_EndToEndFlow() public {
-        factory.createMarket("Test Token", "TT");
+        factory.createMarket{value: initiationFee}("Test Token", "TT");
 
         MarketToken token = MarketToken(factory.allTokens(0));
         MarketCurve curve = MarketCurve(factory.tokenToCurve(token));
