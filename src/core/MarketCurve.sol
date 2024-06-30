@@ -54,22 +54,20 @@ contract MarketCurve {
     }
 
     //////////////////// VARIABLES ////////////////////
-    address public mom;
     Status public status;
-    MarketToken public token;
     Balances public balances;
+    MarketToken public token;
+    MarketFactory public mom;
     CurveParameters public params;
-    FeeParamters public feeParams;
     UniswapV2LiquidityAdapter public dexAdapter;
 
     //////////////////// CONSTANTS ////////////////////
     address constant BURN_ADDRESS = address(0x0);
 
     //////////////////// CONSTRUCTOR ////////////////////
-    constructor(CurveParameters memory _params, FeeParamters memory _feeParams) {
-        mom = msg.sender;
+    constructor(CurveParameters memory _params) {
+        mom = MarketFactory(msg.sender);
         params = _params;
-        feeParams = _feeParams;
         status = Status.Created;
     }
 
@@ -96,7 +94,9 @@ contract MarketCurve {
             revert Curve_InvalidInputAmount(xIn);
         }
 
-        uint256 fee = (xIn * feeParams.tradeFee) / feeParams.BASIS_POINTS;
+        (address feeTo, uint256 BASIS_POINTS,, uint256 tradeFee,) = mom.feeParams();
+
+        uint256 fee = (xIn * tradeFee) / BASIS_POINTS;
         uint256 adjustedXIn = xIn - fee;
         // The amount of ETH to buy should not exceed the ETH liquidity cap
         if (balances.x + adjustedXIn > params.cap) {
@@ -122,7 +122,7 @@ contract MarketCurve {
         }
 
         token.transfer(msg.sender, out);
-        sendEther(feeParams.feeTo, fee);
+        sendEther(feeTo, fee);
 
         emit Trade(msg.sender, true, adjustedXIn, out);
     }
@@ -135,7 +135,8 @@ contract MarketCurve {
             revert Curve_InvalidOutputAmount(out);
         }
 
-        uint256 fee = (out * feeParams.tradeFee) / feeParams.BASIS_POINTS;
+        (address feeTo, uint256 BASIS_POINTS,, uint256 tradeFee,) = mom.feeParams();
+        uint256 fee = (out * tradeFee) / BASIS_POINTS;
         uint256 adjustedOut = out - fee;
 
         balances.x -= out;
@@ -146,7 +147,7 @@ contract MarketCurve {
 
         token.transferFrom(msg.sender, address(this), yIn);
         sendEther(msg.sender, adjustedOut);
-        sendEther(feeParams.feeTo, fee);
+        sendEther(feeTo, fee);
 
         emit Trade(msg.sender, false, adjustedOut, yIn);
     }
@@ -156,11 +157,12 @@ contract MarketCurve {
             revert Curve_InvalidStatus(Status.CapReached, status);
         }
         status = Status.Graduated;
+
+        (address feeTo,,,, uint256 graduationFee) = mom.feeParams();
+        uint256 xToLP = balances.x - graduationFee;
+        sendEther(feeTo, graduationFee);
+
         token.approve(address(dexAdapter), params.yReservedForLP);
-
-        uint256 xToLP = balances.x - feeParams.graduationFee;
-        sendEther(feeParams.feeTo, feeParams.graduationFee);
-
         dexAdapter.createPairAndAddLiquidityETH{value: xToLP}(
             address(token), xToLP, params.yReservedForLP, BURN_ADDRESS
         );
@@ -222,7 +224,7 @@ contract MarketCurve {
 
     //////////////////// MODIFIERS ////////////////////
     modifier onlyMom() {
-        if (msg.sender != mom) {
+        if (msg.sender != address(mom)) {
             revert Curve_NotMOM();
         }
         _;
