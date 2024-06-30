@@ -11,6 +11,8 @@ contract MarketCurveTest is Test {
     MarketCurve public curve;
     MarketToken public token;
 
+    MarketFactory.FeeParameters public feeParams;
+
     address constant WETH = address(0);
     address constant FACTORY = address(0);
     address constant ROUTER = address(0);
@@ -26,6 +28,7 @@ contract MarketCurveTest is Test {
     uint256 public constant BASIS_POINTS = 10_000;
     uint256 public constant tradeFee = 100;
     uint256 public constant graduationFee = 0;
+    uint256 public constant initiationFee = 0.0015 ether;
 
     function setUp() public {
         curve = new MarketCurve(
@@ -35,14 +38,16 @@ contract MarketCurveTest is Test {
                 yVirtualReserve: yInitialVirtualReserve,
                 yReservedForLP: yReservedForLP,
                 yReservedForCurve: yReservedForCurve
-            }),
-            MarketCurve.FeeParamters({
-                feeTo: address(0x0),
-                BASIS_POINTS: BASIS_POINTS,
-                tradeFee: tradeFee,
-                graduationFee: graduationFee
             })
         );
+
+        feeParams = MarketFactory.FeeParameters({
+            feeTo: address(0x0),
+            BASIS_POINTS: BASIS_POINTS,
+            initiationFee: initiationFee,
+            tradeFee: tradeFee,
+            graduationFee: graduationFee
+        });
 
         token = new MarketToken("Test Token", "TT", address(curve), yToMint);
     }

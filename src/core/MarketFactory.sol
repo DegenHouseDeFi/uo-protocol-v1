@@ -84,12 +84,6 @@ contract MarketFactory is Ownable {
                 yVirtualReserve: params.yStartVirtualReserve,
                 yReservedForLP: params.yReservedForLP,
                 yReservedForCurve: params.yReservedForCurve
-            }),
-            MarketCurve.FeeParamters({
-                feeTo: feeParams.feeTo,
-                BASIS_POINTS: feeParams.BASIS_POINTS,
-                tradeFee: feeParams.tradeFee,
-                graduationFee: feeParams.graduationFee
             })
         );
 
