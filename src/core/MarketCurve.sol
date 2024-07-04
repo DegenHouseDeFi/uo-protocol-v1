@@ -162,6 +162,7 @@ contract MarketCurve {
         uint256 xToLP = balances.x - graduationFee;
         sendEther(feeTo, graduationFee);
 
+        token.setGraduated(true);
         token.approve(address(dexAdapter), params.yReservedForLP);
         dexAdapter.createPairAndAddLiquidityETH{value: xToLP}(
             address(token), xToLP, params.yReservedForLP, BURN_ADDRESS

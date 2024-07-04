@@ -8,6 +8,7 @@ import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
  */
 contract MarketToken is ERC20 {
     error Token_UnauthorizedTransfer(address from, address to);
+    error Token_UnauthorizedAccess();
 
     address public immutable mom;
     mapping(address => bool) public allowedTransfer;
@@ -29,5 +30,12 @@ contract MarketToken is ERC20 {
         } else {
             revert Token_UnauthorizedTransfer(from, to);
         }
+    }
+
+    function setGraduated(bool _isGraduated) external {
+        if (msg.sender != mom) {
+            revert Token_UnauthorizedAccess();
+        }
+        isGraduated = _isGraduated;
     }
 }
