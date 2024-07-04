@@ -25,7 +25,7 @@ contract UniV2AdapterTest is Test {
     uint256 public constant ethToSupply = 3.644 ether; // from NOTES.md
 
     function setUp() public {
-        token = new MarketToken("Test Token", "TT", address(this), tokenToSupply);
+        token = new MarketToken("Test Token", "TT", address(this), address(this), tokenToSupply);
         adapter = new UniswapV2LiquidityAdapter(WETH, address(FACTORY), ROUTER);
     }
 

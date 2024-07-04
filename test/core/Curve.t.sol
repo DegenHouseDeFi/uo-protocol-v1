@@ -49,7 +49,7 @@ contract MarketCurveTest is Test {
             graduationFee: graduationFee
         });
 
-        token = new MarketToken("Test Token", "TT", address(curve), yToMint);
+        token = new MarketToken("Test Token", "TT", address(curve), address(curve), yToMint);
     }
 
     receive() external payable {}

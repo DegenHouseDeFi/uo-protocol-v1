@@ -89,7 +89,7 @@ contract MarketFactory is Ownable {
 
         sendEther(feeParams.feeTo, feeParams.initiationFee);
 
-        MarketToken token = new MarketToken(name, symbol, address(curve), params.yMintAmount);
+        MarketToken token = new MarketToken(name, symbol, address(curve), address(curve), params.yMintAmount);
         curve.initialiseCurve(token, dexAdapter);
 
         allTokens.push(address(token));
