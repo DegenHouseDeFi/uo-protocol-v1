@@ -26,6 +26,8 @@ contract UniV2AdapterTest is Test {
 
     function setUp() public {
         token = new MarketToken("Test Token", "TT", address(this), address(this), tokenToSupply);
+        token.setGraduated(true);
+
         adapter = new UniswapV2LiquidityAdapter(WETH, address(FACTORY), ROUTER);
     }
 
