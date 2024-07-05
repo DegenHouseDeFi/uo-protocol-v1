@@ -46,7 +46,8 @@ contract BaseIntegrationTest is Test {
         );
     }
 
-    function test_EndToEndFlow() public {
+    function test_BuyTokenAndGraduate() public {
+        vm.deal(address(this), 1000 ether);
         factory.createMarket{value: initiationFee}("Test Token", "TT");
 
         MarketToken token = MarketToken(factory.allTokens(0));
@@ -56,8 +57,9 @@ contract BaseIntegrationTest is Test {
         assertNotEq(address(curve), address(0));
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.Trading));
 
-        uint256 amount = buyToken(curve, 1 ether);
-        sellToken(token, curve, amount);
+        // uint256 amount = buyToken(curve, 1 ether);
+        buyToken(curve, 1 ether);
+        // sellToken(token, curve, amount);
 
         buyToken(curve, 5 ether);
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.CapReached));

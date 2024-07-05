@@ -91,7 +91,7 @@ contract MarketCurve {
 
     function buy(uint256 xIn, uint256 yMinOut) external payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
         if (msg.value != xIn) {
-            revert Curve_InvalidInputAmount(xIn);
+            revert Curve_InvalidInputAmount(msg.value);
         }
 
         (address feeTo, uint256 BASIS_POINTS,, uint256 tradeFee,) = mom.feeParams();
@@ -131,13 +131,13 @@ contract MarketCurve {
         uint256 quote = getQuote(0, yIn);
 
         out = quote;
-        if (out < xMinOut) {
-            revert Curve_InvalidOutputAmount(out);
-        }
 
         (address feeTo, uint256 BASIS_POINTS,, uint256 tradeFee,) = mom.feeParams();
         uint256 fee = (out * tradeFee) / BASIS_POINTS;
-        uint256 adjustedOut = out - fee;
+        out = out - fee;
+        if (out < xMinOut) {
+            revert Curve_InvalidOutputAmount(out);
+        }
 
         balances.x -= out;
         balances.y += yIn;
@@ -146,10 +146,10 @@ contract MarketCurve {
         params.yVirtualReserve += yIn;
 
         token.transferFrom(msg.sender, address(this), yIn);
-        sendEther(msg.sender, adjustedOut);
+        sendEther(msg.sender, out);
         sendEther(feeTo, fee);
 
-        emit Trade(msg.sender, false, adjustedOut, yIn);
+        emit Trade(msg.sender, false, out, yIn);
     }
 
     function graduate() external {

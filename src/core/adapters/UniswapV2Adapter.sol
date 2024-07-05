@@ -29,10 +29,7 @@ contract UniswapV2LiquidityAdapter {
     {
         if (msg.value < xToSupply) revert InsufficientETH();
 
-        address pair = IUniswapV2Factory(factory).getPair(token, WETH);
-        if (pair == address(0)) {
-            pair = IUniswapV2Factory(factory).createPair(token, WETH);
-        }
+        address pair = IUniswapV2Factory(factory).createPair(token, WETH);
 
         MarketToken(token).transferFrom(msg.sender, address(this), yToSupply);
         MarketToken(token).approve(address(router), yToSupply);

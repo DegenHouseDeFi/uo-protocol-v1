@@ -40,6 +40,57 @@ contract MarketFactoryTest is Test {
         );
     }
 
+    function test_FactoryConstructor() public {
+        factory = new MarketFactory(
+            MarketFactory.MarketParameters({
+                liquidityCap: 3.744 ether,
+                xStartVirtualReserve: 1.296 ether,
+                yStartVirtualReserve: 1_080_000_000 ether,
+                yMintAmount: 1_000_000_000 ether,
+                yReservedForLP: 200_000_000 ether,
+                yReservedForCurve: 800_000_000 ether
+            }),
+            MarketFactory.FeeParameters({
+                feeTo: address(this),
+                BASIS_POINTS: 10_000,
+                initiationFee: initiationFee,
+                tradeFee: 100,
+                graduationFee: graduationFee
+            }),
+            WETH,
+            FACTORY,
+            ROUTER
+        );
+
+        assertEq(factory.owner(), address(this));
+        assertNotEq(address(factory.dexAdapter()), address(0));
+
+        // check curve params
+        (
+            uint256 _liquidityCap,
+            uint256 _xStartVirtualReserve,
+            uint256 _yStartVirtualReserve,
+            uint256 _yMintAmount,
+            uint256 _yReservedForLP,
+            uint256 _yReservedForCurve
+        ) = factory.params();
+        assertEq(_liquidityCap, 3.744 ether);
+        assertEq(_xStartVirtualReserve, 1.296 ether);
+        assertEq(_yStartVirtualReserve, 1_080_000_000 ether);
+        assertEq(_yMintAmount, 1_000_000_000 ether);
+        assertEq(_yReservedForLP, 200_000_000 ether);
+        assertEq(_yReservedForCurve, 800_000_000 ether);
+
+        // check fee params
+        (address _feeTo, uint256 _BASIS_POINTS, uint256 _initiationFee, uint256 _tradeFee, uint256 _graduationFee) =
+            factory.feeParams();
+        assertEq(_feeTo, address(this));
+        assertEq(_BASIS_POINTS, 10_000);
+        assertEq(_initiationFee, initiationFee);
+        assertEq(_tradeFee, 100);
+        assertEq(_graduationFee, graduationFee);
+    }
+
     function test_MarketCreated() public {
         factory.createMarket{value: initiationFee}("Test Token", "TT");
         MarketToken token = MarketToken(factory.allTokens(0));
@@ -69,5 +120,69 @@ contract MarketFactoryTest is Test {
         assertEq(yReserve, 1_080_000_000 ether);
         assertEq(yLP, 200_000_000 ether);
         assertEq(yCurve, 800_000_000 ether);
+    }
+
+    function testFail_MarketCreateWithWrongFee() public {
+        factory.createMarket{value: initiationFee - 1}("Test Token", "TT");
+    }
+
+    // test to update all parameters, market, fee, dexAdapter
+    function test_UpdateParams() public {
+        factory.updateMarketParams(
+            2.744 ether, 2.296 ether, 1_010_000_000 ether, 1_000_000_000 ether, 200_000_000 ether, 800_000_000 ether
+        );
+
+        (
+            uint256 _liquidityCap,
+            uint256 _xStartVirtualReserve,
+            uint256 _yStartVirtualReserve,
+            uint256 _yMintAmount,
+            uint256 _yReservedForLP,
+            uint256 _yReservedForCurve
+        ) = factory.params();
+        assertEq(_liquidityCap, 2.744 ether);
+        assertEq(_xStartVirtualReserve, 2.296 ether);
+        assertEq(_yStartVirtualReserve, 1_010_000_000 ether);
+        assertEq(_yMintAmount, 1_000_000_000 ether);
+        assertEq(_yReservedForLP, 200_000_000 ether);
+        assertEq(_yReservedForCurve, 800_000_000 ether);
+
+        // update fee params
+        factory.updateFeeParams(address(this), 10_000, initiationFee, 100, graduationFee);
+        // check fee params
+        (address _feeTo, uint256 _BASIS_POINTS, uint256 _initiationFee, uint256 _tradeFee, uint256 _graduationFee) =
+            factory.feeParams();
+        assertEq(_feeTo, address(this));
+        assertEq(_BASIS_POINTS, 10_000);
+        assertEq(_initiationFee, initiationFee);
+        assertEq(_tradeFee, 100);
+        assertEq(_graduationFee, graduationFee);
+
+        // update dexAdapter
+        factory.newDexAdapter(WETH, FACTORY, ROUTER);
+        assertNotEq(address(factory.dexAdapter()), address(0));
+    }
+
+    function testFail_UpdateMarketParamsWithWrongCaller() public {
+        address random = address(0x123);
+        vm.prank(random);
+
+        factory.updateMarketParams(
+            2.744 ether, 2.296 ether, 1_010_000_000 ether, 1_000_000_000 ether, 200_000_000 ether, 800_000_000 ether
+        );
+    }
+
+    function testFail_UpdateFeeParamsWithWrongCaller() public {
+        address random = address(0x123);
+        vm.prank(random);
+
+        factory.updateFeeParams(address(this), 10_000, initiationFee, 100, graduationFee);
+    }
+
+    function testFail_NewDexAdapterWithWrongCaller() public {
+        address random = address(0x123);
+        vm.prank(random);
+
+        factory.newDexAdapter(WETH, FACTORY, ROUTER);
     }
 }

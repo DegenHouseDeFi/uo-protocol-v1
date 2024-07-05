@@ -31,6 +31,13 @@ contract UniV2AdapterTest is Test {
         adapter = new UniswapV2LiquidityAdapter(WETH, address(FACTORY), ROUTER);
     }
 
+    function test_AdapterConstructor() public {
+        adapter = new UniswapV2LiquidityAdapter(WETH, address(FACTORY), ROUTER);
+        assertEq(address(adapter.WETH()), WETH);
+        assertEq(address(adapter.factory()), FACTORY);
+        assertEq(address(adapter.router()), ROUTER);
+    }
+
     function test_CreatePairAndAddLiquidityETH() public {
         (uint256 tokenBalanceBefore, uint256 etherBalanceBefore) =
             (token.balanceOf(address(this)), address(this).balance);
@@ -50,5 +57,14 @@ contract UniV2AdapterTest is Test {
         assertTrue(pair != address(0), "Pair should exist");
         assertEq(tokenBalanceAfter, tokenBalanceBefore - tokenToSupply);
         assertEq(etherBalanceAfter, etherBalanceBefore - ethToSupply);
+    }
+
+    function test_CreatePairAndAddLiquidityETHWithInvalidETH() public {
+        token.approve(address(adapter), tokenToSupply);
+
+        vm.expectRevert(UniswapV2LiquidityAdapter.InsufficientETH.selector);
+        adapter.createPairAndAddLiquidityETH{value: ethToSupply - 1}(
+            address(token), ethToSupply, tokenToSupply, address(this)
+        );
     }
 }

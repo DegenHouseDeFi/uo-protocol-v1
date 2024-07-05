@@ -59,10 +59,44 @@ contract MarketCurveTest is Test {
         assertEq(address(curve.mom()), address(this));
         assertEq(address(curve.token()), address(0));
 
+        vm.expectEmit(true, true, false, false);
+        emit MarketCurve.CurveInitialised(address(token), address(adapter));
         curve.initialiseCurve(token, adapter);
 
         assertEq(uint256(curve.status()), uint256(MarketCurve.Status.Trading));
         assertEq(address(curve.token()), address(token));
+        (uint256 xBalance, uint256 yBalance) = curve.balances();
+        assertEq(xBalance, 0);
+        assertEq(yBalance, yReservedForCurve);
+    }
+
+    function test_InitialiseCurveWithWrongBalance() public {
+        MarketCurve crv = new MarketCurve(
+            MarketCurve.CurveParameters({
+                cap: cap,
+                xVirtualReserve: xInitialVirtualReserve,
+                yVirtualReserve: yInitialVirtualReserve,
+                yReservedForLP: yReservedForLP,
+                yReservedForCurve: yReservedForCurve
+            })
+        );
+
+        feeParams = MarketFactory.FeeParameters({
+            feeTo: address(0x0),
+            BASIS_POINTS: BASIS_POINTS,
+            initiationFee: initiationFee,
+            tradeFee: tradeFee,
+            graduationFee: graduationFee
+        });
+
+        MarketToken tkn = new MarketToken("Test Token", "TT", address(crv), address(crv), yToMint - 100 ether);
+
+        vm.expectRevert(abi.encodeWithSelector(MarketCurve.Curve_InvalidBalance.selector, yToMint, yToMint - 100 ether));
+        crv.initialiseCurve(tkn, adapter);
+
+        vm.prank(address(0x123));
+        vm.expectRevert(MarketCurve.Curve_NotMOM.selector);
+        crv.initialiseCurve(tkn, adapter);
     }
 
     function test_getReserve() public view {
@@ -100,6 +134,19 @@ contract MarketCurveTest is Test {
         assertEq(quote, 0); // quote is 0 because there is no ETH in the Curve yet.
     }
 
+    function test_getQuoteWithZeroValues() public {
+        curve.initialiseCurve(token, adapter);
+        uint256 quote = curve.getQuote(0, 0);
+        assertEq(quote, 0);
+    }
+
+    function test_getQuoteWithBothValues() public {
+        curve.initialiseCurve(token, adapter);
+        // curve.getQuote should revert with MarketCurve.Curve_InvalidInputAmounts
+        vm.expectRevert(MarketCurve.Curve_InvalidInputAmounts.selector);
+        curve.getQuote(1 ether, 1 ether);
+    }
+
     function test_buyTokenWithOneEther() public {
         curve.initialiseCurve(token, adapter);
 
@@ -116,6 +163,8 @@ contract MarketCurveTest is Test {
         uint256 ethBalanceSelfBefore = address(this).balance;
         uint256 tokenBalanceSelfBefore = token.balanceOf(address(this));
 
+        vm.expectEmit(true, true, false, true);
+        emit MarketCurve.Trade(address(this), true, toSellAdjusted, quote);
         curve.buy{value: toSell}(toSell, 1);
 
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
@@ -133,7 +182,36 @@ contract MarketCurveTest is Test {
         assertEq(tokenBalanceSelfAfter - tokenBalanceSelfBefore, quote, "tokenBalanceImbalance");
     }
 
+    function test_buyTokenWithInvalidParams() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MarketCurve.Curve_InvalidStatus.selector, MarketCurve.Status.Trading, MarketCurve.Status.Created
+            )
+        );
+        curve.buy{value: 1 ether}(1 ether, 1);
+
+        curve.initialiseCurve(token, adapter);
+
+        vm.expectRevert(abi.encodeWithSelector(MarketCurve.Curve_InvalidInputAmount.selector, 0.1 ether));
+        curve.buy{value: 0.1 ether}(1 ether, 1);
+
+        uint256 toSell = 1 ether;
+        uint256 fee = (toSell * tradeFee) / BASIS_POINTS;
+        uint256 toSellAdjusted = toSell - fee;
+        uint256 quote = curve.getQuote(toSellAdjusted, 0);
+
+        vm.expectRevert(abi.encodeWithSelector(MarketCurve.Curve_InvalidOutputAmount.selector, quote));
+        curve.buy{value: toSell}(toSell, quote + 10 ether);
+    }
+
     function test_sellTokenForOneEther() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MarketCurve.Curve_InvalidStatus.selector, MarketCurve.Status.Trading, MarketCurve.Status.Created
+            )
+        );
+        curve.sell(1000 ether, 1);
+
         curve.initialiseCurve(token, adapter);
 
         // Need to buy tokens before we can sell.
@@ -149,20 +227,34 @@ contract MarketCurveTest is Test {
 
         uint256 ethBalanceSelfBefore = address(this).balance;
         uint256 tokenBalanceSelfBefore = token.balanceOf(address(this));
-
+        vm.expectEmit(true, true, false, true);
+        emit MarketCurve.Trade(address(this), false, adjustedQuote, tokensToSell);
         curve.sell(tokensToSell, 1);
 
         (uint256 xReserveAfter, uint256 yReserveAfter) = curve.getReserves();
         (uint256 xBalanceAfter, uint256 yBalanceAfter) = curve.getBalances();
 
-        assertEq(xReserveBefore - xReserveAfter, quote, "xReserveImbalance");
+        assertEq(xReserveBefore - xReserveAfter, adjustedQuote, "xReserveImbalance");
         assertEq(yReserveAfter - yReserveBefore, tokensToSell, "yReserveImbalance");
 
-        assertEq(xBalanceBefore - xBalanceAfter, quote, "xBalanceImbalance");
+        assertEq(xBalanceBefore - xBalanceAfter, adjustedQuote, "xBalanceImbalance");
         assertEq(yBalanceAfter - yBalanceBefore, tokensToSell, "yBalanceImbalance");
 
         assertEq(address(this).balance - ethBalanceSelfBefore, adjustedQuote, "ethBalanceImbalance");
         assertEq(tokenBalanceSelfBefore - token.balanceOf(address(this)), tokensToSell, "tokenBalanceImbalance");
+    }
+
+    function test_sellTokenWithInvalidParams() public {
+        curve.initialiseCurve(token, adapter);
+
+        curve.buy{value: 1 ether}(1 ether, 1);
+        uint256 tokensToSell = token.balanceOf(address(this));
+        token.approve(address(curve), tokensToSell);
+
+        uint256 quote = curve.getQuote(0, tokensToSell);
+        uint256 adjustedQuote = quote - ((quote * tradeFee) / BASIS_POINTS);
+        vm.expectRevert(abi.encodeWithSelector(MarketCurve.Curve_InvalidOutputAmount.selector, adjustedQuote));
+        curve.sell(tokensToSell, adjustedQuote + 1);
     }
 
     function test_tokenCapReach() public {
@@ -171,5 +263,26 @@ contract MarketCurveTest is Test {
 
         MarketCurve.Status curveStatus = curve.status();
         assertEq(uint256(curveStatus), uint256(MarketCurve.Status.CapReached));
+    }
+
+    function test_invalidStatusGraduation() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MarketCurve.Curve_InvalidStatus.selector, MarketCurve.Status.CapReached, MarketCurve.Status.Created
+            )
+        );
+        curve.graduate();
+
+        curve.initialiseCurve(token, adapter);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MarketCurve.Curve_InvalidStatus.selector, MarketCurve.Status.CapReached, MarketCurve.Status.Trading
+            )
+        );
+        curve.graduate();
+
+        curve.buy{value: 3.8 ether}(3.8 ether, 1);
+        vm.expectRevert(); // should revert when not run on Base Mainnet Fork
+        curve.graduate();
     }
 }

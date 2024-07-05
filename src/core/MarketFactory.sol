@@ -75,8 +75,6 @@ contract MarketFactory is Ownable {
             revert Factory_InvalidFee({expected: feeParams.initiationFee, received: msg.value});
         }
 
-        require(msg.value == feeParams.initiationFee, "INVALID_FEE");
-
         MarketCurve curve = new MarketCurve(
             MarketCurve.CurveParameters({
                 cap: params.liquidityCap,
