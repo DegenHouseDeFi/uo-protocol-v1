@@ -41,13 +41,6 @@ contract MarketCurve {
         uint256 yReservedForCurve; // amount of created tokens to sell through the curve
     }
 
-    struct FeeParamters {
-        address feeTo;
-        uint256 BASIS_POINTS;
-        uint256 tradeFee;
-        uint256 graduationFee;
-    }
-
     struct Balances {
         uint256 x;
         uint256 y;
