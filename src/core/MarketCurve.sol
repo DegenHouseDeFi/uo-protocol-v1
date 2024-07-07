@@ -90,10 +90,6 @@ contract MarketCurve {
     }
 
     function buy(uint256 xIn, uint256 yMinOut) external payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
-        if (msg.value != xIn) {
-            revert Curve_InvalidInputAmount(msg.value);
-        }
-
         (address feeTo, uint256 BASIS_POINTS,, uint256 tradeFee,) = mom.feeParams();
 
         uint256 fee = (xIn * tradeFee) / BASIS_POINTS;
