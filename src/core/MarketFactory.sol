@@ -13,7 +13,7 @@ import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
  */
 contract MarketFactory is Ownable {
     //////////////////// EVENTS ////////////////////
-    event MarketCreated(address creator, string name, address token, address curve);
+    event MarketCreated(address indexed creator, string name, address token, address curve);
     event MarketParametersUpdated(
         uint256 liquidityCap,
         uint256 xStartVirtualReserve,
