@@ -30,6 +30,7 @@ contract MarketFactory is Ownable {
     //////////////////// ERRORS ////////////////////
     error Factory_InvalidFee(uint256 expected, uint256 received);
     error Factory_FailedEtherTransfer();
+    error Factory_InvalidParams();
 
     //////////////////// DATA STRUCTURES ////////////////////
     /**
@@ -83,6 +84,13 @@ contract MarketFactory is Ownable {
         address _v2Factory,
         address _v2Router
     ) Ownable(msg.sender) {
+        if (
+            _params.yMintAmount != _params.yReservedForCurve + _params.yReservedForLP || _WETH == address(0)
+                || _v2Factory == address(0) || _v2Router == address(0)
+        ) {
+            revert Factory_InvalidParams();
+        }
+
         params = _params;
         feeParams = _feeParams;
         dexAdapter = new UniswapV2LiquidityAdapter(_WETH, _v2Factory, _v2Router);
@@ -111,9 +119,6 @@ contract MarketFactory is Ownable {
             })
         );
 
-        // Send the initiation fee to the specified fee recipient
-        sendEther(feeParams.feeTo, feeParams.initiationFee);
-
         // Create a new market token associated with the market curve
         MarketToken token = new MarketToken(name, symbol, address(curve), address(curve), params.yMintAmount);
         // Initialize the market curve with the market token and the DEX adapter
@@ -122,6 +127,9 @@ contract MarketFactory is Ownable {
         // Update the directory
         allTokens.push(address(token));
         tokenToCurve[token] = curve;
+
+        // Send the initiation fee to the specified fee recipient
+        sendEther(feeParams.feeTo, feeParams.initiationFee);
 
         emit MarketCreated(msg.sender, name, address(token), address(curve));
     }
@@ -136,6 +144,10 @@ contract MarketFactory is Ownable {
         uint256 _yReservedForLP,
         uint256 _yReservedForCurve
     ) external onlyOwner {
+        if (_yMintAmount != _yReservedForCurve + _yReservedForLP) {
+            revert Factory_InvalidParams();
+        }
+
         params = MarketParameters({
             liquidityCap: _liquidityCap,
             xStartVirtualReserve: _xStartVirtualReserve,
@@ -174,6 +186,10 @@ contract MarketFactory is Ownable {
     }
 
     function newDexAdapter(address _WETH, address _v2Factory, address _v2Router) external onlyOwner {
+        if (address(_WETH) == address(0) || address(_v2Factory) == address(0) || address(_v2Router) == address(0)) {
+            revert Factory_InvalidParams();
+        }
+
         dexAdapter = new UniswapV2LiquidityAdapter(_WETH, _v2Factory, _v2Router);
         emit DexAdapterUpdated(address(dexAdapter));
     }

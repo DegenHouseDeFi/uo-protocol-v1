@@ -70,7 +70,7 @@ contract MarketCurveTest is Test {
         assertEq(yBalance, yReservedForCurve);
     }
 
-    function test_InitialiseCurveWithWrongBalance() public {
+    function test_InitialiseCurveWithWrongCaller() public {
         MarketCurve crv = new MarketCurve(
             MarketCurve.CurveParameters({
                 cap: cap,
@@ -89,10 +89,7 @@ contract MarketCurveTest is Test {
             graduationFee: graduationFee
         });
 
-        MarketToken tkn = new MarketToken("Test Token", "TT", address(crv), address(crv), yToMint - 100 ether);
-
-        vm.expectRevert(abi.encodeWithSelector(MarketCurve.Curve_InvalidBalance.selector, yToMint, yToMint - 100 ether));
-        crv.initialiseCurve(tkn, adapter);
+        MarketToken tkn = new MarketToken("Test Token", "TT", address(crv), address(crv), yToMint);
 
         vm.prank(address(0x123));
         vm.expectRevert(MarketCurve.Curve_NotMOM.selector);

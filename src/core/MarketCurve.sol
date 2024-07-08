@@ -39,6 +39,7 @@ contract MarketCurve {
     event Graduated(address indexed token, address indexed dexPair);
 
     ////////////// ERRORS //////////////
+    error Curve_InvalidParams();
     error Curve_InvalidBalance(uint256 expected, uint256 actual);
     error Curve_InvalidStatus(Status expected, Status actual);
 
@@ -107,6 +108,12 @@ contract MarketCurve {
 
     //////////////////// CONSTRUCTOR ////////////////////
     constructor(CurveParameters memory _params) {
+        if (
+            _params.cap == 0 || _params.yReservedForLP == 0 || _params.yReservedForCurve == 0
+                || _params.xVirtualReserve == 0 || _params.yVirtualReserve == 0
+        ) {
+            revert Curve_InvalidParams();
+        }
         mom = MarketFactory(msg.sender);
         params = _params;
         status = Status.Created;
@@ -120,6 +127,10 @@ contract MarketCurve {
      * @param _dexAdapter The address of the UniswapV2LiquidityAdapter contract.
      */
     function initialiseCurve(MarketToken _token, UniswapV2LiquidityAdapter _dexAdapter) external onlyMom {
+        if (address(token) != address(0) || address(dexAdapter) != address(0)) {
+            revert Curve_InvalidParams();
+        }
+
         // Set the token, DEX adapter, and status
         token = _token;
         dexAdapter = _dexAdapter;

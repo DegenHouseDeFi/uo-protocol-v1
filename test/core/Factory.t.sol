@@ -8,9 +8,9 @@ import {MarketCurve} from "../../src/core/MarketCurve.sol";
 
 contract MarketFactoryTest is Test {
     MarketFactory public factory;
-    address constant WETH = address(0);
-    address constant FACTORY = address(0);
-    address constant ROUTER = address(0);
+    address constant WETH = address(0x123);
+    address constant FACTORY = address(0x123);
+    address constant ROUTER = address(0x123);
 
     receive() external payable {}
 

@@ -20,6 +20,8 @@ contract MarketToken is ERC20 {
      */
     error Token_UnauthorizedAccess();
 
+    error Token_InvalidParams();
+
     address public immutable mom;
     mapping(address => bool) public allowedTransfer;
     bool public isGraduated = false;
@@ -35,6 +37,10 @@ contract MarketToken is ERC20 {
     constructor(string memory _name, string memory _symbol, address _receiver, address _mom, uint256 _initialSupply)
         ERC20(_name, _symbol)
     {
+        if (_initialSupply == 0 || _receiver == address(0) || _mom == address(0)) {
+            revert Token_InvalidParams();
+        }
+
         mom = _mom;
 
         allowedTransfer[_receiver] = true;
