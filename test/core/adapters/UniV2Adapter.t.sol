@@ -24,7 +24,13 @@ contract UniV2AdapterTest is Test {
     uint256 public constant tokenToSupply = 200_000_000 ether;
     uint256 public constant ethToSupply = 3.644 ether; // from NOTES.md
 
+    string constant BASE_URL = "https://mainnet.base.org";
+    uint256 constant FORK_BLOCK = 16842704;
+
     function setUp() public {
+        vm.createSelectFork(BASE_URL);
+        vm.rollFork(FORK_BLOCK);
+
         token = new MarketToken("Test Token", "TT", address(this), address(this), tokenToSupply);
         token.setGraduated(true);
 

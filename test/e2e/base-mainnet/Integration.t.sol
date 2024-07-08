@@ -25,9 +25,15 @@ contract BaseIntegrationTest is Test {
     uint128 constant initiationFee = 0.0015 ether;
     uint128 constant graduationFee = 0.0015 ether;
 
+    string constant BASE_URL = "https://mainnet.base.org";
+    uint256 constant FORK_BLOCK = 16842704;
+
     receive() external payable {}
 
     function setUp() public {
+        vm.createSelectFork(BASE_URL);
+        vm.rollFork(FORK_BLOCK);
+
         factory = new MarketFactory(
             MarketFactory.MarketParameters({
                 liquidityCap: liquidityCap,
