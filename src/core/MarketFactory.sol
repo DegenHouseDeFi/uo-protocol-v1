@@ -60,13 +60,13 @@ contract MarketFactory is Ownable {
         /// @notice The address where the fees will be sent to.
         address feeTo;
         /// @notice The basis points for calculating fees.
-        uint256 BASIS_POINTS;
-        /// @notice The initiation fee for creating a new market.
-        uint256 initiationFee;
+        uint16 BASIS_POINTS;
         /// @notice The fee charged for each trade in the market.
-        uint256 tradeFee;
+        uint16 tradeFee;
+        /// @notice The initiation fee for creating a new market.
+        uint128 initiationFee;
         /// @notice The fee charged for graduating a market.
-        uint256 graduationFee;
+        uint128 graduationFee;
     }
 
     //////////////////// VARIABLES ////////////////////
@@ -169,10 +169,10 @@ contract MarketFactory is Ownable {
 
     function updateFeeParams(
         address _feeTo,
-        uint256 _BASIS_POINTS,
-        uint256 _initiationFee,
-        uint256 _tradeFee,
-        uint256 _graduationFee
+        uint16 _BASIS_POINTS,
+        uint16 _tradeFee,
+        uint128 _initiationFee,
+        uint128 _graduationFee
     ) external onlyOwner {
         feeParams = FeeParameters({
             feeTo: _feeTo,

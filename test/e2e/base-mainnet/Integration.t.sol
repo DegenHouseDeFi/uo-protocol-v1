@@ -13,13 +13,17 @@ contract BaseIntegrationTest is Test {
     address constant FACTORY = address(0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6);
     address constant ROUTER = address(0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24);
 
-    uint256 constant initiationFee = 0.0015 ether;
     uint256 constant liquidityCap = 3.744 ether;
     uint256 constant xStartVirtualReserve = 1.296 ether;
     uint256 constant yStartVirtualReserve = 1_080_000_000 ether;
     uint256 constant yMintAmount = 1_000_000_000 ether;
     uint256 constant yReservedForLP = 200_000_000 ether;
     uint256 constant yReservedForCurve = 800_000_000 ether;
+
+    uint16 constant BASIS_POINTS = 10_000;
+    uint16 constant tradeFee = 100;
+    uint128 constant initiationFee = 0.0015 ether;
+    uint128 constant graduationFee = 0.0015 ether;
 
     receive() external payable {}
 
@@ -35,10 +39,10 @@ contract BaseIntegrationTest is Test {
             }),
             MarketFactory.FeeParameters({
                 feeTo: address(this),
-                BASIS_POINTS: 10_000,
+                BASIS_POINTS: BASIS_POINTS,
+                tradeFee: tradeFee,
                 initiationFee: initiationFee,
-                tradeFee: 100,
-                graduationFee: 0
+                graduationFee: graduationFee
             }),
             WETH,
             FACTORY,

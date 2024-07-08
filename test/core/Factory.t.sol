@@ -14,8 +14,8 @@ contract MarketFactoryTest is Test {
 
     receive() external payable {}
 
-    uint256 constant initiationFee = 0.0015 ether;
-    uint256 constant graduationFee = 0.005 ether;
+    uint128 constant initiationFee = 0.0015 ether;
+    uint128 constant graduationFee = 0.005 ether;
 
     function setUp() public {
         factory = new MarketFactory(
@@ -82,12 +82,12 @@ contract MarketFactoryTest is Test {
         assertEq(_yReservedForCurve, 800_000_000 ether);
 
         // check fee params
-        (address _feeTo, uint256 _BASIS_POINTS, uint256 _initiationFee, uint256 _tradeFee, uint256 _graduationFee) =
+        (address _feeTo, uint256 _BASIS_POINTS, uint256 _tradeFee, uint256 _initiationFee, uint256 _graduationFee) =
             factory.feeParams();
         assertEq(_feeTo, address(this));
         assertEq(_BASIS_POINTS, 10_000);
-        assertEq(_initiationFee, initiationFee);
         assertEq(_tradeFee, 100);
+        assertEq(_initiationFee, initiationFee);
         assertEq(_graduationFee, graduationFee);
     }
 
@@ -148,14 +148,14 @@ contract MarketFactoryTest is Test {
         assertEq(_yReservedForCurve, 800_000_000 ether);
 
         // update fee params
-        factory.updateFeeParams(address(this), 10_000, initiationFee, 100, graduationFee);
+        factory.updateFeeParams(address(this), 10_000, 100, initiationFee, graduationFee);
         // check fee params
-        (address _feeTo, uint256 _BASIS_POINTS, uint256 _initiationFee, uint256 _tradeFee, uint256 _graduationFee) =
+        (address _feeTo, uint256 _BASIS_POINTS, uint256 _tradeFee, uint256 _initiationFee, uint256 _graduationFee) =
             factory.feeParams();
         assertEq(_feeTo, address(this));
         assertEq(_BASIS_POINTS, 10_000);
-        assertEq(_initiationFee, initiationFee);
         assertEq(_tradeFee, 100);
+        assertEq(_initiationFee, initiationFee);
         assertEq(_graduationFee, graduationFee);
 
         // update dexAdapter
@@ -176,7 +176,7 @@ contract MarketFactoryTest is Test {
         address random = address(0x123);
         vm.prank(random);
 
-        factory.updateFeeParams(address(this), 10_000, initiationFee, 100, graduationFee);
+        factory.updateFeeParams(address(this), 10_000, 100, initiationFee, graduationFee);
     }
 
     function testFail_NewDexAdapterWithWrongCaller() public {

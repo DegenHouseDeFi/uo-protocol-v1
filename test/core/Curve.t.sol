@@ -25,10 +25,10 @@ contract MarketCurveTest is Test {
     uint256 public constant yReservedForCurve = 800_000_000 ether;
     uint256 public constant yToMint = 1_000_000_000 ether;
 
-    uint256 public constant BASIS_POINTS = 10_000;
-    uint256 public constant tradeFee = 100;
-    uint256 public constant graduationFee = 0;
-    uint256 public constant initiationFee = 0.0015 ether;
+    uint16 public constant BASIS_POINTS = 10_000;
+    uint16 public constant tradeFee = 100;
+    uint128 public constant graduationFee = 0;
+    uint128 public constant initiationFee = 0.0015 ether;
 
     function setUp() public {
         curve = new MarketCurve(
@@ -44,8 +44,8 @@ contract MarketCurveTest is Test {
         feeParams = MarketFactory.FeeParameters({
             feeTo: address(0x0),
             BASIS_POINTS: BASIS_POINTS,
-            initiationFee: initiationFee,
             tradeFee: tradeFee,
+            initiationFee: initiationFee,
             graduationFee: graduationFee
         });
 
