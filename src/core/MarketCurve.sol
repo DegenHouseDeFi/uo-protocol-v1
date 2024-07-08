@@ -98,8 +98,8 @@ contract MarketCurve {
     Status public status;
     Balances public balances;
     MarketToken public token;
-    MarketFactory public mom;
     CurveParameters public params;
+    MarketFactory public immutable mom;
     UniswapV2LiquidityAdapter public dexAdapter;
 
     //////////////////// CONSTANTS ////////////////////
