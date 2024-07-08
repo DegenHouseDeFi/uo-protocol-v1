@@ -32,20 +32,39 @@ contract MarketFactory is Ownable {
     error Factory_FailedEtherTransfer();
 
     //////////////////// DATA STRUCTURES ////////////////////
+    /**
+     * @title MarketParameters
+     * @dev Struct to store the parameters for creating a market.
+     */
     struct MarketParameters {
-        uint256 liquidityCap; // amount of ETH to be raised before moving to a DEX
-        uint256 xStartVirtualReserve; // initial virtual reserve for ETH
-        uint256 yStartVirtualReserve; // initial virtual reserve for created token
-        uint256 yMintAmount; // Supply of the created token
-        uint256 yReservedForLP; // Amount of created token to LP once curve cap is reached
-        uint256 yReservedForCurve; // Amount of created tokens to sell through the curve
+        /// @notice Amount of ETH to be raised before moving to a DEX
+        uint256 liquidityCap;
+        /// @notice Initial virtual reserve for ETH
+        uint256 xStartVirtualReserve;
+        /// @notice Initial virtual reserve for created token
+        uint256 yStartVirtualReserve;
+        /// @notice Supply of the created token
+        uint256 yMintAmount;
+        /// @notice Amount of created token to LP once curve cap is reached
+        uint256 yReservedForLP;
+        /// @notice Amount of created tokens to sell through the curve
+        uint256 yReservedForCurve;
     }
 
+    /**
+     * @title FeeParameters struct
+     * @notice This struct represents the parameters for fees in the market factory.
+     */
     struct FeeParameters {
+        /// @notice The address where the fees will be sent to.
         address feeTo;
+        /// @notice The basis points for calculating fees.
         uint256 BASIS_POINTS;
+        /// @notice The initiation fee for creating a new market.
         uint256 initiationFee;
+        /// @notice The fee charged for each trade in the market.
         uint256 tradeFee;
+        /// @notice The fee charged for graduating a market.
         uint256 graduationFee;
     }
 
@@ -70,11 +89,18 @@ contract MarketFactory is Ownable {
     }
 
     //////////////////// FUNCTIONS ////////////////////
+    /**
+     * @dev Creates a new market with the specified name and symbol.
+     * @param name The name of the market.
+     * @param symbol The symbol of the market.
+     */
     function createMarket(string calldata name, string calldata symbol) external payable {
+        // Check if the received fee matches the initiation fee
         if (msg.value != feeParams.initiationFee) {
             revert Factory_InvalidFee({expected: feeParams.initiationFee, received: msg.value});
         }
 
+        // Create a new market curve with the specified parameters
         MarketCurve curve = new MarketCurve(
             MarketCurve.CurveParameters({
                 cap: params.liquidityCap,
@@ -85,11 +111,15 @@ contract MarketFactory is Ownable {
             })
         );
 
+        // Send the initiation fee to the specified fee recipient
         sendEther(feeParams.feeTo, feeParams.initiationFee);
 
+        // Create a new market token associated with the market curve
         MarketToken token = new MarketToken(name, symbol, address(curve), address(curve), params.yMintAmount);
+        // Initialize the market curve with the market token and the DEX adapter
         curve.initialiseCurve(token, dexAdapter);
 
+        // Update the directory
         allTokens.push(address(token));
         tokenToCurve[token] = curve;
 
