@@ -155,13 +155,9 @@ contract MarketCurve {
 
         // Calculate the trade fee based on the input amount
         uint256 fee = (xIn * tradeFee) / BASIS_POINTS;
-        uint256 adjustedXIn = xIn - fee;
+        uint256 xInAfterFee = xIn - fee;
 
-        // Check if the amount of ETH to buy exceeds the ETH liquidity cap
-        if (balances.x + adjustedXIn > params.cap) {
-            adjustedXIn = params.cap - balances.x;
-            sendEther(msg.sender, xIn - adjustedXIn - fee);
-        }
+        uint256 adjustedXIn = balances.x + xInAfterFee > params.cap ? params.cap - balances.x : xInAfterFee;
 
         // Calculate the output amount based on the adjusted input amount
         uint256 quote = getQuote(adjustedXIn, 0);
@@ -187,6 +183,11 @@ contract MarketCurve {
         // Transfer the output tokens to the buyer and send the trade fee to the fee recipient
         token.transfer(msg.sender, out);
         sendEther(feeTo, fee);
+
+        // Send back x if there is any remaining after the trade.
+        if (xInAfterFee - adjustedXIn > 0) {
+            sendEther(msg.sender, xInAfterFee - adjustedXIn);
+        }
 
         // Emit a trade event
         emit Trade(msg.sender, true, adjustedXIn, out);
