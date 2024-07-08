@@ -201,4 +201,9 @@ contract MarketFactory is Ownable {
             revert Factory_FailedEtherTransfer();
         }
     }
+
+    //////////////////// VIEW FUNCTIONS ////////////////////
+    function allMarkets() external view returns (address[] memory) {
+        return allTokens;
+    }
 }
