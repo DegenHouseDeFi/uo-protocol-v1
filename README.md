@@ -1,66 +1,26 @@
-## Foundry
+# UpOnly Protocol
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This repository is a collection of smart contracts that collectively form the UpOnly Protocol.
 
-Foundry consists of:
+To read about the protocol in detail, make your way over to [Protocol Doc](/docs/PROTOCOL.md) and for more rough notes, there's a [notes folder](/docs/notes/) inside the docs directory. 
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+#### TLDR
+> UpOnly is a protocol designed to let users of the protocol deploy a new token without requiring any liquidity. The newly deployed token gets traded on a bonding curve with preset parameters of the curve(starting price, cap, etc). Once the token has reached the liquidity cap, the accrued liquidity along with a preset amount of tokens are added to Uniswap V2 to be openly tradeable for the public. 
 
-## Documentation
+## Testing
 
-https://book.getfoundry.sh/
+There are unit tests for all the four contracts —
+1. [Factory.t.sol](/test/core/Factory.t.sol)
+2. [Curve.t.sol](/test/core/Curve.t.sol)
+3. [Token.t.sol](/test/core/Token.t.sol)
+4. [UniV2Adapter.t.sol](/test/core/adapter/UniV2Adapter.t.sol)
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
+And there's one end-to-end test [here](/test/e2e/base-mainnet/Integration.t.sol) that runs on a fork of Base Mainnet. The forking is handled inside the test itself, you do not need to do anything special to run this test. 
 
 ```shell
 $ forge test
 ```
 
-### Format
+---
 
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+If you have any questions or thoughts about the protocol, hit me up on [Telegram](https://t.me/manangouhari) or [X](https://x.com/manangouhari).
