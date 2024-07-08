@@ -2,12 +2,13 @@
 pragma solidity ^0.8.20;
 
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IMarketToken} from "../interfaces/core/IMarketToken.sol";
 
 /**
  * @title MarketToken
  * @dev Contract representing the ERC-20 token with limited transferability until graduation.
  */
-contract MarketToken is ERC20 {
+contract MarketToken is ERC20, IMarketToken {
     /**
      * @dev Emitted when a token transfer is unauthorized.
      * @param from The address from which the transfer was attempted.
