@@ -299,7 +299,7 @@ contract MarketCurve {
     }
 
     function getParams()
-        public
+        external
         view
         returns (
             uint256 cap,
@@ -314,12 +314,12 @@ contract MarketCurve {
         );
     }
 
-    function getReserves() public view returns (uint256 xReserve, uint256 yReserve) {
+    function getReserves() external view returns (uint256 xReserve, uint256 yReserve) {
         xReserve = params.xVirtualReserve;
         yReserve = params.yVirtualReserve;
     }
 
-    function getBalances() public view returns (uint256 x, uint256 y) {
+    function getBalances() external view returns (uint256 x, uint256 y) {
         (x, y) = (balances.x, balances.y);
     }
 
