@@ -146,6 +146,10 @@ contract MarketCurve {
      * @return out The amount of output tokens received from the trade.
      */
     function buy(uint256 xIn, uint256 yMinOut) external payable onlyTrading nonZeroIn(xIn) returns (uint256 out) {
+        if (msg.value != xIn) {
+            revert Curve_InvalidInputAmount(msg.value);
+        }
+
         // Retrieve fee parameters from the fee manager contract
         (address feeTo, uint256 BASIS_POINTS,, uint256 tradeFee,) = mom.feeParams();
 
