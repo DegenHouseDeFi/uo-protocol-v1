@@ -125,15 +125,9 @@ contract MarketCurve {
         dexAdapter = _dexAdapter;
         status = Status.Trading;
 
-        // Check if the balance of the contract is equal to the sum of reserved balances
-        uint256 balanceY = token.balanceOf(address(this));
-        if (balanceY != params.yReservedForCurve + params.yReservedForLP) {
-            revert Curve_InvalidBalance(params.yReservedForCurve + params.yReservedForLP, balanceY);
-        }
-
         // Set the x and y balances
         balances.x = 0;
-        balances.y = balanceY - params.yReservedForLP;
+        balances.y = params.yReservedForCurve;
 
         // Emit an event to indicate that the curve has been initialised
         emit CurveInitialised(address(token), address(dexAdapter));
