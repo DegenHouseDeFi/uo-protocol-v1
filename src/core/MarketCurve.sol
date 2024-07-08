@@ -8,7 +8,7 @@ import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
 
 /**
  * @title Bonding Curve for a token market
- * @author Manan Gouhar (@manangouhari)
+ * @author Manan Gouhari (@manangouhari)
  * @notice This contract implements the Market with a bonding curve for a token.
  * @dev MarketCurve contract is designed to only safely work with MarketToken. (Use with other ERC-20 implementations at your own risk)
  */
@@ -44,14 +44,14 @@ contract MarketCurve {
     error Curve_InvalidStatus(Status expected, Status actual);
 
     /**
-     * @param amount The invalid input amount.
+     * @param invalidAmount The invalid input amount.
      */
-    error Curve_InvalidInputAmount(uint256 amount);
+    error Curve_InvalidInputAmount(uint256 invalidAmount);
 
     /**
-     * @param amount The invalid output amount.
+     * @param invalidAmount The invalid output amount.
      */
-    error Curve_InvalidOutputAmount(uint256 amount);
+    error Curve_InvalidOutputAmount(uint256 invalidAmount);
     error Curve_InvalidInputAmounts();
     error Curve_FailedEtherTransfer();
     error Curve_NotMOM();
@@ -138,6 +138,8 @@ contract MarketCurve {
 
         // Set the x and y balances
         balances.x = 0;
+        // skipped a token balance check here to save on gas
+        // the contract is designed to work safely ONLY within the system of UpOnly(i.e., with MarketFactory and MarketToken).
         balances.y = params.yReservedForCurve;
 
         // Emit an event to indicate that the curve has been initialised
@@ -162,11 +164,11 @@ contract MarketCurve {
         uint256 fee = (xIn * tradeFee) / BASIS_POINTS;
         uint256 xInAfterFee = xIn - fee;
 
+        // If the buy order would exceed the liquidity cap, adjust the input amount to match the cap.
         uint256 adjustedXIn = balances.x + xInAfterFee > params.cap ? params.cap - balances.x : xInAfterFee;
 
         // Calculate the output amount based on the adjusted input amount
         uint256 quote = getQuote(adjustedXIn, 0);
-
         out = quote;
 
         // Revert the transaction if the output amount is less than the minimum expected
@@ -182,6 +184,7 @@ contract MarketCurve {
 
         // Update the status if the y balance reaches zero
         if (balances.y == 0) {
+            // Curve & Token now ready for Graduation.
             status = Status.CapReached;
         }
 
@@ -190,6 +193,7 @@ contract MarketCurve {
         sendEther(feeTo, fee);
 
         // Send back x if there is any remaining after the trade.
+        // This condition is true if the input amount plus existing balance exceeded the liquidity cap.
         if (xInAfterFee - adjustedXIn > 0) {
             sendEther(msg.sender, xInAfterFee - adjustedXIn);
         }
@@ -200,14 +204,13 @@ contract MarketCurve {
 
     /**
      * @dev Executes a sell trade.
-     * @param yIn The amount of token Y to sell.
-     * @param xMinOut The minimum amount of token X expected to receive.
-     * @return out The amount of token X received after the trade.
+     * @param yIn The amount of token `y` to sell.
+     * @param xMinOut The minimum amount of token `x` expected to receive.
+     * @return out The amount of token `x` received after the trade.
      */
     function sell(uint256 yIn, uint256 xMinOut) external onlyTrading nonZeroIn(yIn) returns (uint256 out) {
         // Calculate the quote for the trade
         uint256 quote = getQuote(0, yIn);
-
         out = quote;
 
         // Get fee parameters from the mom contract

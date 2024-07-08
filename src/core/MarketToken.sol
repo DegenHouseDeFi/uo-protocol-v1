@@ -6,6 +6,7 @@ import {IMarketToken} from "../interfaces/core/IMarketToken.sol";
 
 /**
  * @title MarketToken
+ * @author Manan Gouhari (@manangouhari)
  * @dev Contract representing the ERC-20 token with limited transferability until graduation.
  */
 contract MarketToken is ERC20, IMarketToken {
@@ -51,6 +52,7 @@ contract MarketToken is ERC20, IMarketToken {
 
     /**
      * @dev Internal function to update token balances on transfers.
+     * @dev This function only allows a transfer if the token is graduated or if either the to or from address is allowed for transfer.
      * @param from The address from which the tokens are transferred.
      * @param to The address to which the tokens are transferred.
      * @param value The amount of tokens being transferred.

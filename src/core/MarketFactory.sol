@@ -9,6 +9,7 @@ import {UniswapV2LiquidityAdapter} from "./adapters/UniswapV2Adapter.sol";
 
 /**
  * @title Contract to create new token markets.
+ * @author Manan Gouhari (@manangouhari)
  * @dev Responsible for accurately deploying new token markets with the preffered parameters.
  */
 contract MarketFactory is Ownable {
@@ -98,9 +99,9 @@ contract MarketFactory is Ownable {
 
     //////////////////// FUNCTIONS ////////////////////
     /**
-     * @dev Creates a new market with the specified name and symbol.
-     * @param name The name of the market.
-     * @param symbol The symbol of the market.
+     * @dev Creates a new token and a market associated with it.
+     * @param name The name of the token.
+     * @param symbol The symbol of the token.
      */
     function createMarket(string calldata name, string calldata symbol) external payable {
         // Check if the received fee matches the initiation fee

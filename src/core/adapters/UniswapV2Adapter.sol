@@ -8,6 +8,7 @@ import {IUniswapV2Router02} from "../../interfaces/uniswapV2/IUniswapV2Router02.
 
 /**
  * @title UniswapV2LiquidityAdapter
+ * @author Manan Gouhari (@manangouhari)
  * @dev A contract that allows creating a Uniswap V2 pair and adding liquidity to it using ETH and ERC20 tokens.
  */
 contract UniswapV2LiquidityAdapter {
