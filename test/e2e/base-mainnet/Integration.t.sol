@@ -22,6 +22,7 @@ contract BaseIntegrationTest is Test {
 
     uint16 constant BASIS_POINTS = 10_000;
     uint16 constant tradeFee = 100;
+    uint16 constant initialBuyFee = 200;
     uint128 constant initiationFee = 0.0015 ether;
     uint128 constant graduationFee = 0.0015 ether;
 
@@ -47,6 +48,7 @@ contract BaseIntegrationTest is Test {
                 feeTo: address(this),
                 BASIS_POINTS: BASIS_POINTS,
                 tradeFee: tradeFee,
+                initialBuyFee: initialBuyFee,
                 initiationFee: initiationFee,
                 graduationFee: graduationFee
             }),
@@ -58,7 +60,7 @@ contract BaseIntegrationTest is Test {
 
     function test_BuyTokenAndGraduate() public {
         vm.deal(address(this), 1000 ether);
-        factory.createMarket{value: initiationFee}("Test Token", "TT");
+        factory.createMarket{value: initiationFee}("Test Token", "TT", false, 0);
 
         MarketToken token = MarketToken(factory.allTokens(0));
         MarketCurve curve = MarketCurve(factory.tokenToCurve(token));

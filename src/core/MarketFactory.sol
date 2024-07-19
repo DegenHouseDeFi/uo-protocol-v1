@@ -24,7 +24,12 @@ contract MarketFactory is Ownable {
         uint256 yReservedForCurve
     );
     event FeeParametersUpdated(
-        address feeTo, uint256 BASIS_POINTS, uint256 initiationFee, uint256 tradeFee, uint256 graduationFee
+        address feeTo,
+        uint256 BASIS_POINTS,
+        uint256 initiationFee,
+        uint256 tradeFee,
+        uint256 initialBuyFee,
+        uint256 graduationFee
     );
     event DexAdapterUpdated(address adapter);
 
@@ -64,6 +69,8 @@ contract MarketFactory is Ownable {
         uint16 BASIS_POINTS;
         /// @notice The fee charged for each trade in the market.
         uint16 tradeFee;
+        /// @notice The fee charged on the initial buy. This is a fee charged on top of the above trade fee.
+        uint16 initialBuyFee;
         /// @notice The initiation fee for creating a new market.
         uint128 initiationFee;
         /// @notice The fee charged for graduating a market.
@@ -103,10 +110,13 @@ contract MarketFactory is Ownable {
      * @param name The name of the token.
      * @param symbol The symbol of the token.
      */
-    function createMarket(string calldata name, string calldata symbol) external payable {
+    function createMarket(string calldata name, string calldata symbol, bool initialBuy, uint256 initialBuyAmount)
+        external
+        payable
+    {
         // Check if the received fee matches the initiation fee
-        if (msg.value != feeParams.initiationFee) {
-            revert Factory_InvalidFee({expected: feeParams.initiationFee, received: msg.value});
+        if (msg.value != feeParams.initiationFee + initialBuyAmount) {
+            revert Factory_InvalidFee({expected: feeParams.initiationFee + initialBuyAmount, received: msg.value});
         }
 
         // Create a new market curve with the specified parameters
@@ -121,13 +131,22 @@ contract MarketFactory is Ownable {
         );
 
         // Create a new market token associated with the market curve
-        MarketToken token = new MarketToken(name, symbol, address(curve), address(curve), params.yMintAmount);
-        // Initialize the market curve with the market token and the DEX adapter
-        curve.initialiseCurve(token, dexAdapter);
+        MarketToken token = new MarketToken(name, symbol, address(curve), params.yMintAmount);
 
         // Update the directory
         allTokens.push(address(token));
         tokenToCurve[token] = curve;
+
+        // Initialize the market curve with the market token and the DEX adapter
+        curve.initialiseCurve(token, dexAdapter);
+
+        if (initialBuy) {
+            // Buy the initial amount of tokens
+            uint256 fee = (initialBuyAmount * feeParams.initialBuyFee) / feeParams.BASIS_POINTS;
+            uint256 out = curve.buy{value: initialBuyAmount - fee}(initialBuyAmount - fee, 1);
+            token.transfer(msg.sender, out);
+            sendEther(feeParams.feeTo, out);
+        }
 
         // Send the initiation fee to the specified fee recipient
         sendEther(feeParams.feeTo, feeParams.initiationFee);
@@ -172,6 +191,7 @@ contract MarketFactory is Ownable {
         address _feeTo,
         uint16 _BASIS_POINTS,
         uint16 _tradeFee,
+        uint16 _initialBuyFee,
         uint128 _initiationFee,
         uint128 _graduationFee
     ) external onlyOwner {
@@ -180,10 +200,11 @@ contract MarketFactory is Ownable {
             BASIS_POINTS: _BASIS_POINTS,
             initiationFee: _initiationFee,
             tradeFee: _tradeFee,
+            initialBuyFee: _initialBuyFee,
             graduationFee: _graduationFee
         });
 
-        emit FeeParametersUpdated(_feeTo, _BASIS_POINTS, _initiationFee, _tradeFee, _graduationFee);
+        emit FeeParametersUpdated(_feeTo, _BASIS_POINTS, _initiationFee, _tradeFee, _initialBuyFee, _graduationFee);
     }
 
     function newDexAdapter(address _WETH, address _v2Factory, address _v2Router) external onlyOwner {

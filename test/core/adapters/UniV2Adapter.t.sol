@@ -31,7 +31,7 @@ contract UniV2AdapterTest is Test {
         vm.createSelectFork(BASE_URL);
         vm.rollFork(FORK_BLOCK);
 
-        token = new MarketToken("Test Token", "TT", address(this), address(this), tokenToSupply);
+        token = new MarketToken("Test Token", "TT", address(this), tokenToSupply);
         token.setGraduated(true);
 
         adapter = new UniswapV2LiquidityAdapter(WETH, address(FACTORY), ROUTER);

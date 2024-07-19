@@ -32,22 +32,22 @@ contract MarketToken is ERC20, IMarketToken {
      * @dev Constructor function for the MarketToken contract.
      * @param _name The name of the token.
      * @param _symbol The symbol of the token.
-     * @param _receiver The address of the receiver.
-     * @param _mom The address of the mom.
+     * @param _mom The address of the mom (curve).
      * @param _initialSupply The initial supply of the token.
      */
-    constructor(string memory _name, string memory _symbol, address _receiver, address _mom, uint256 _initialSupply)
+    constructor(string memory _name, string memory _symbol, address _mom, uint256 _initialSupply)
         ERC20(_name, _symbol)
     {
-        if (_initialSupply == 0 || _receiver == address(0) || _mom == address(0)) {
+        if (_initialSupply == 0 || _mom == address(0)) {
             revert Token_InvalidParams();
         }
 
         mom = _mom;
 
-        allowedTransfer[_receiver] = true;
+        allowedTransfer[msg.sender] = true;
         allowedTransfer[_mom] = true;
-        _mint(_receiver, _initialSupply);
+
+        _mint(_mom, _initialSupply);
     }
 
     /**

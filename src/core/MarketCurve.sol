@@ -158,7 +158,7 @@ contract MarketCurve {
         }
 
         // Retrieve fee parameters from the fee manager contract
-        (address feeTo, uint16 BASIS_POINTS, uint16 tradeFee,,) = mom.feeParams();
+        (address feeTo, uint16 BASIS_POINTS, uint16 tradeFee,,,) = mom.feeParams();
 
         // Calculate the trade fee based on the input amount
         uint256 fee = (xIn * tradeFee) / BASIS_POINTS;
@@ -214,7 +214,7 @@ contract MarketCurve {
         out = quote;
 
         // Get fee parameters from the mom contract
-        (address feeTo, uint16 BASIS_POINTS, uint16 tradeFee,,) = mom.feeParams();
+        (address feeTo, uint16 BASIS_POINTS, uint16 tradeFee,,,) = mom.feeParams();
         // Calculate the trade fee
         uint256 fee = (out * tradeFee) / BASIS_POINTS;
         // Deduct the trade fee from the output amount
@@ -256,7 +256,7 @@ contract MarketCurve {
         status = Status.Graduated;
 
         // Get the fee parameters from the MarketFactory
-        (address feeTo,,,, uint128 graduationFee) = mom.feeParams();
+        (address feeTo,,,,, uint128 graduationFee) = mom.feeParams();
         uint256 xToLP = balances.x - graduationFee;
 
         // Send the graduation fee to the specified fee recipient

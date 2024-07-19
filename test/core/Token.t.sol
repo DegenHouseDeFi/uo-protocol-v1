@@ -15,7 +15,7 @@ contract MarketTokenTest is Test {
         receiver = address(this);
         parent = address(this);
 
-        token = new MarketToken("Test Token", "TT", receiver, parent, 1_000_000_000 ether);
+        token = new MarketToken("Test Token", "TT", parent, 1_000_000_000 ether);
     }
 
     function test_TokenCreated() public view {

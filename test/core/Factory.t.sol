@@ -32,6 +32,7 @@ contract MarketFactoryTest is Test {
                 BASIS_POINTS: 10_000,
                 initiationFee: initiationFee,
                 tradeFee: 100,
+                initialBuyFee: 200,
                 graduationFee: graduationFee
             }),
             WETH,
@@ -54,6 +55,7 @@ contract MarketFactoryTest is Test {
                 feeTo: address(this),
                 BASIS_POINTS: 10_000,
                 initiationFee: initiationFee,
+                initialBuyFee: 200,
                 tradeFee: 100,
                 graduationFee: graduationFee
             }),
@@ -82,17 +84,24 @@ contract MarketFactoryTest is Test {
         assertEq(_yReservedForCurve, 800_000_000 ether);
 
         // check fee params
-        (address _feeTo, uint256 _BASIS_POINTS, uint256 _tradeFee, uint256 _initiationFee, uint256 _graduationFee) =
-            factory.feeParams();
+        (
+            address _feeTo,
+            uint256 _BASIS_POINTS,
+            uint256 _tradeFee,
+            uint256 _initialBuyFee,
+            uint256 _initiationFee,
+            uint256 _graduationFee
+        ) = factory.feeParams();
         assertEq(_feeTo, address(this));
         assertEq(_BASIS_POINTS, 10_000);
         assertEq(_tradeFee, 100);
+        assertEq(_initialBuyFee, 200);
         assertEq(_initiationFee, initiationFee);
         assertEq(_graduationFee, graduationFee);
     }
 
     function test_MarketCreated() public {
-        factory.createMarket{value: initiationFee}("Test Token", "TT");
+        factory.createMarket{value: initiationFee}("Test Token", "TT", false, 0);
         MarketToken token = MarketToken(factory.allTokens(0));
         MarketCurve curve = MarketCurve(factory.tokenToCurve(token));
 
@@ -123,7 +132,7 @@ contract MarketFactoryTest is Test {
     }
 
     function testFail_MarketCreateWithWrongFee() public {
-        factory.createMarket{value: initiationFee - 1}("Test Token", "TT");
+        factory.createMarket{value: initiationFee - 1}("Test Token", "TT", false, 0);
     }
 
     // test to update all parameters, market, fee, dexAdapter
@@ -148,13 +157,20 @@ contract MarketFactoryTest is Test {
         assertEq(_yReservedForCurve, 800_000_000 ether);
 
         // update fee params
-        factory.updateFeeParams(address(this), 10_000, 100, initiationFee, graduationFee);
+        factory.updateFeeParams(address(this), 10_000, 100, 200, initiationFee, graduationFee);
         // check fee params
-        (address _feeTo, uint256 _BASIS_POINTS, uint256 _tradeFee, uint256 _initiationFee, uint256 _graduationFee) =
-            factory.feeParams();
+        (
+            address _feeTo,
+            uint256 _BASIS_POINTS,
+            uint256 _tradeFee,
+            uint256 _initialBuyFee,
+            uint256 _initiationFee,
+            uint256 _graduationFee
+        ) = factory.feeParams();
         assertEq(_feeTo, address(this));
         assertEq(_BASIS_POINTS, 10_000);
         assertEq(_tradeFee, 100);
+        assertEq(_initialBuyFee, 200);
         assertEq(_initiationFee, initiationFee);
         assertEq(_graduationFee, graduationFee);
 
@@ -176,7 +192,7 @@ contract MarketFactoryTest is Test {
         address random = address(0x123);
         vm.prank(random);
 
-        factory.updateFeeParams(address(this), 10_000, 100, initiationFee, graduationFee);
+        factory.updateFeeParams(address(this), 10_000, 100, 200, initiationFee, graduationFee);
     }
 
     function testFail_NewDexAdapterWithWrongCaller() public {

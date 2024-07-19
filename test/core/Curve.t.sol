@@ -27,6 +27,7 @@ contract MarketCurveTest is Test {
 
     uint16 public constant BASIS_POINTS = 10_000;
     uint16 public constant tradeFee = 100;
+    uint16 public constant initialBuyFee = 200;
     uint128 public constant graduationFee = 0;
     uint128 public constant initiationFee = 0.0015 ether;
 
@@ -45,11 +46,12 @@ contract MarketCurveTest is Test {
             feeTo: address(0x0),
             BASIS_POINTS: BASIS_POINTS,
             tradeFee: tradeFee,
+            initialBuyFee: initialBuyFee,
             initiationFee: initiationFee,
             graduationFee: graduationFee
         });
 
-        token = new MarketToken("Test Token", "TT", address(curve), address(curve), yToMint);
+        token = new MarketToken("Test Token", "TT", address(curve), yToMint);
     }
 
     receive() external payable {}
@@ -86,10 +88,11 @@ contract MarketCurveTest is Test {
             BASIS_POINTS: BASIS_POINTS,
             initiationFee: initiationFee,
             tradeFee: tradeFee,
+            initialBuyFee: initialBuyFee,
             graduationFee: graduationFee
         });
 
-        MarketToken tkn = new MarketToken("Test Token", "TT", address(crv), address(crv), yToMint);
+        MarketToken tkn = new MarketToken("Test Token", "TT", address(crv), yToMint);
 
         vm.prank(address(0x123));
         vm.expectRevert(MarketCurve.Curve_NotMOM.selector);
